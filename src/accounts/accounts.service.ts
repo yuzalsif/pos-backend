@@ -43,23 +43,49 @@ export class AccountsService {
 
     async deposit(tenantId: string, actorId: string, accountId: string, dto: DepositDto) {
         const account = await this.get(tenantId, accountId);
+        const now = new Date().toISOString();
         account.balance += dto.amount;
         account.updatedBy = actorId;
-        account.updatedAt = new Date().toISOString();
+        account.updatedAt = now;
         await this.db.insert(account);
+
+        // Create transaction record
+        const transaction = await this.createTransaction(tenantId, actorId, {
+            type: 'deposit',
+            accountId: account._id,
+            amount: dto.amount,
+            categoryId: dto.categoryId,
+            currency: account.currency,
+            balanceAfter: account.balance,
+            timestamp: now,
+        });
+
         await this.logs.record(tenantId, { userId: actorId }, 'account.deposit', 'account', account._id, dto);
-        return account;
+        return { account, transaction };
     }
 
     async withdraw(tenantId: string, actorId: string, accountId: string, dto: WithdrawDto) {
         const account = await this.get(tenantId, accountId);
         if (account.balance < dto.amount) throw new BadRequestException('account.withdraw.insufficient_funds');
+        const now = new Date().toISOString();
         account.balance -= dto.amount;
         account.updatedBy = actorId;
-        account.updatedAt = new Date().toISOString();
+        account.updatedAt = now;
         await this.db.insert(account);
+
+        // Create transaction record
+        const transaction = await this.createTransaction(tenantId, actorId, {
+            type: 'withdraw',
+            accountId: account._id,
+            amount: dto.amount,
+            categoryId: dto.categoryId,
+            currency: account.currency,
+            balanceAfter: account.balance,
+            timestamp: now,
+        });
+
         await this.logs.record(tenantId, { userId: actorId }, 'account.withdraw', 'account', account._id, dto);
-        return account;
+        return { account, transaction };
     }
 
     async transfer(tenantId: string, actorId: string, dto: TransferDto) {
@@ -69,23 +95,117 @@ export class AccountsService {
         if (!from || !to) throw new NotFoundException('account.not_found');
         if (from.currency !== to.currency) throw new BadRequestException('account.transfer.currency_mismatch');
         if (from.balance < amount) throw new BadRequestException('account.transfer.insufficient_funds');
-        // Atomic transfer: deduct, then credit, rollback if credit fails
+        const now = new Date().toISOString();
+        const transferId = `transfer-${Date.now()}`;
+
+        // Store original balances for rollback
+        const originalFromBalance = from.balance;
+        const originalToBalance = to.balance;
+
+        // Atomic transfer: deduct, then credit, rollback if any step fails
         from.balance -= amount;
         from.updatedBy = actorId;
-        from.updatedAt = new Date().toISOString();
+        from.updatedAt = now;
+
+        let fromTransaction: any = null;
+        let toTransaction: any = null;
+
         try {
             await this.db.insert(from);
+
+            // Add amount to destination account
             to.balance += amount;
             to.updatedBy = actorId;
-            to.updatedAt = new Date().toISOString();
+            to.updatedAt = now;
             await this.db.insert(to);
+
+            // Create transaction records for both accounts
+            fromTransaction = await this.createTransaction(tenantId, actorId, {
+                type: 'transfer_out',
+                accountId: from._id,
+                amount: amount,
+                categoryId: categoryId,
+                currency: from.currency,
+                balanceAfter: from.balance,
+                timestamp: now,
+                relatedAccountId: to._id,
+                transferId,
+            });
+
+            toTransaction = await this.createTransaction(tenantId, actorId, {
+                type: 'transfer_in',
+                accountId: to._id,
+                amount: amount,
+                categoryId: categoryId,
+                currency: to.currency,
+                balanceAfter: to.balance,
+                timestamp: now,
+                relatedAccountId: from._id,
+                transferId,
+            });
+
+            await this.logs.record(tenantId, { userId: actorId }, 'account.transfer', 'account', `${from._id}->${to._id}`, { fromAccountId, toAccountId, amount, categoryId });
+            return { from, to, transactions: [fromTransaction, toTransaction] };
         } catch (err) {
-            // Rollback deduction
-            from.balance += amount;
+            // Rollback: restore original balances and delete any created transactions
+            from.balance = originalFromBalance;
+            from.updatedAt = new Date().toISOString();
             await this.db.insert(from);
+
+            // If 'to' account was updated, rollback its balance too
+            if (to.balance !== originalToBalance) {
+                to.balance = originalToBalance;
+                to.updatedAt = new Date().toISOString();
+                await this.db.insert(to);
+            }
+
+            // Delete any transactions that were created
+            if (fromTransaction && fromTransaction._id) {
+                try {
+                    const doc = await this.db.get(fromTransaction._id);
+                    await this.db.destroy(doc._id, doc._rev);
+                } catch (deleteErr) {
+                    // Transaction might not exist, ignore error
+                }
+            }
+            if (toTransaction && toTransaction._id) {
+                try {
+                    const doc = await this.db.get(toTransaction._id);
+                    await this.db.destroy(doc._id, doc._rev);
+                } catch (deleteErr) {
+                    // Transaction might not exist, ignore error
+                }
+            }
+
             throw new BadRequestException('account.transfer.failed');
         }
-        await this.logs.record(tenantId, { userId: actorId }, 'account.transfer', 'account', `${from._id}->${to._id}`, { fromAccountId, toAccountId, amount, categoryId });
-        return { from, to };
+    }
+
+    private async createTransaction(tenantId: string, actorId: string, data: any) {
+        const transaction = {
+            _id: `${tenantId}:transaction:${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: data.type,
+            accountId: data.accountId,
+            amount: data.amount,
+            categoryId: data.categoryId,
+            currency: data.currency,
+            balanceAfter: data.balanceAfter,
+            timestamp: data.timestamp,
+            relatedAccountId: data.relatedAccountId,
+            transferId: data.transferId,
+            createdBy: actorId,
+            createdAt: data.timestamp,
+        };
+        await this.db.insert(transaction);
+        return transaction;
+    }
+
+    async getTransactions(tenantId: string, accountId?: string) {
+        const selector = accountId ? { accountId: `${tenantId}:account:${accountId}` } : {};
+        const res = await this.db.partitionedFind(tenantId, {
+            selector,
+            sort: [{ timestamp: 'desc' }]
+        });
+        return res.docs.filter((doc: any) => doc._id.includes(':transaction:'));
     }
 }
