@@ -1,4 +1,4 @@
-import { Provider } from '@nestjs/common';
+import { Provider, Logger, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import nano from 'nano';
 import { DATABASE_CONNECTION } from './database.constants';
@@ -11,21 +11,24 @@ export const databaseProvider: Provider = {
         const dbName = configService.get<string>('COUCHDB_DATABASE');
 
         if (!couchdbUrl || !dbName) {
-            throw new Error('COUCHDB_URL and COUCHDB_DATABASE must be defined in environment variables.');
+            // Fail fast with a clear message (avoid console.log)
+            throw new Error('database.env_missing');
         }
+
+        const logger = new Logger('DatabaseProvider');
 
         const connection = nano(couchdbUrl);
 
         try {
             const dbList = await connection.db.list();
             if (!dbList.includes(dbName)) {
-                console.log(`Database '${dbName}' not found. Creating it...`);
+                logger.log(`Database '${dbName}' not found. Creating it...`);
                 await connection.db.create(dbName, { partitioned: true });
-                console.log(`Database '${dbName}' created successfully.`);
+                logger.log(`Database '${dbName}' created successfully.`);
             }
         } catch (error) {
-            console.error('Failed to connect to or create CouchDB database.', error);
-            throw error;
+            logger.error('Failed to connect to or create CouchDB database.', error as any);
+            throw new InternalServerErrorException('database.connect_failed');
         }
 
         return connection.db.use(dbName);

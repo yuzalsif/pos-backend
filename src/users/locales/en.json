@@ -1,5 +1,18 @@
 {
     "resetPassword": {
         "subject": "Reset your password"
+    },
+    "tenant": {
+        "create_failed": "Failed to create tenant. Please try again later."
+    },
+    "mail": {
+        "send_failed": "Failed to send email."
+    },
+    "auth": {
+        "invalid_token": "Invalid or expired token."
+    },
+    "database": {
+        "env_missing": "Service configuration is incomplete. Please contact support.",
+        "connect_failed": "Service temporarily unavailable. Please try again later."
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Inject, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, ConflictException, NotFoundException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import nano, { type DocumentScope } from 'nano';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
@@ -15,6 +15,8 @@ export class UsersService {
         @Inject(DATABASE_CONNECTION) private readonly db: DocumentScope<any>,
         private readonly mailService?: MailService,
     ) { }
+
+    private readonly logger = new Logger(UsersService.name);
 
     async create(tenantId: string, createUserDto: CreateUserDto) {
         const { email, password, name, role } = createUserDto;
@@ -51,7 +53,7 @@ export class UsersService {
         const result = await this.db.partitionedFind(tenantId, query);
 
         if (result.docs.length > 1) {
-            console.error(`CRITICAL: Found multiple users with the same email ${email} in tenant ${tenantId}`);
+            this.logger.error(`CRITICAL: Found multiple users with the same email ${email} in tenant ${tenantId}`);
         }
 
         return result.docs[0] || null;
@@ -83,8 +85,9 @@ export class UsersService {
                 // insert tenant doc; if it exists we'll get a conflict, which is unlikely
                 await this.db.insert(tenantDoc);
             } catch (err) {
-                // If a conflict or other issue occurs, log and continue if necessary
-                console.error('Failed to create tenant doc (it may already exist):', err);
+                // Fail fast: propagate a clear error so API returns an explicit failure
+                this.logger.error('Failed to create tenant doc', err as any);
+                throw new InternalServerErrorException('tenant.create_failed');
             }
         }
 
@@ -116,8 +119,6 @@ export class UsersService {
 
         // Always return success to avoid leaking which emails exist
         if (!user) {
-            // Optionally log
-            console.log(`Password reset requested for non-existing user ${email} (tenant ${tenantId})`);
             return { ok: true };
         }
 
@@ -133,9 +134,10 @@ export class UsersService {
 
         // Send email (best-effort)
         try {
-            if (this.mailService) await this.mailService.sendResetPasswordEmail(email, tenantId, token);
+            if (this.mailService) await this.mailService.sendResetPasswordEmail(email, tenantId, token, user.locale || 'en', user.name);
         } catch (err) {
-            console.error('Failed to send reset password email', err);
+            // Log internally and continue; do not reveal email sending failures to the caller
+            this.logger.error('Failed to send reset password email', err as any);
         }
 
         return { ok: true };

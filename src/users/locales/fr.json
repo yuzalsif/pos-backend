@@ -1,5 +1,18 @@
 {
     "resetPassword": {
         "subject": "Réinitialisez votre mot de passe"
+    },
+    "tenant": {
+        "create_failed": "Échec de la création du tenant. Veuillez réessayer plus tard."
+    },
+    "mail": {
+        "send_failed": "Échec de l'envoi de l'e-mail."
+    },
+    "auth": {
+        "invalid_token": "Jeton invalide ou expiré."
+    },
+    "database": {
+        "env_missing": "La configuration du service est incomplète. Veuillez contacter le support.",
+        "connect_failed": "Service temporairement indisponible. Veuillez réessayer plus tard."
     }
 }

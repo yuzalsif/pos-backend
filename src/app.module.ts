@@ -6,10 +6,12 @@ import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
+import { I18nModule } from './i18n/i18n.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    I18nModule,
     ProductsModule,
     AuthModule,
     UsersModule,

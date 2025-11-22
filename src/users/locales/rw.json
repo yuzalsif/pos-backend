@@ -1,5 +1,18 @@
 {
     "resetPassword": {
         "subject": "Ongerera ijambo ry'ibanga ryawe"
+    },
+    "tenant": {
+        "create_failed": "Ntibyashobotse gushyiraho tenant. Gerageza nyuma."
+    },
+    "mail": {
+        "send_failed": "Ntibyashobotse kohereza email."
+    },
+    "auth": {
+        "invalid_token": "Ikarita (token) siyo cyangwa imaze igihe."
+    },
+    "database": {
+        "env_missing": "Ibyerekeye serivisi ntibirangiye. Nyamuneka hamagara ubufasha.",
+        "connect_failed": "Serivisi yabuze ubu. Nyamuneka gerageza nyuma."
     }
 }

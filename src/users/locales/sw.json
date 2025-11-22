@@ -1,5 +1,18 @@
 {
     "resetPassword": {
         "subject": "Weka upya nenosiri yako"
+    },
+    "tenant": {
+        "create_failed": "Imeshindikana kuunda duka. Tafadhali jaribu tena baadaye."
+    },
+    "mail": {
+        "send_failed": "Imeshindikana kutuma barua pepe."
+    },
+    "auth": {
+        "invalid_token": "Token sio sahihi au umeisha muda wake."
+    },
+    "database": {
+        "env_missing": "Usanidi wa huduma haujakamilika. Tafadhali wasiliana na msaada.",
+        "connect_failed": "Huduma haipatikani kwa sasa. Tafadhali jaribu tena baadaye."
     }
 }
