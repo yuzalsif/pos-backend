@@ -42,6 +42,11 @@ export class AccountsService {
     }
 
     async deposit(tenantId: string, actorId: string, accountId: string, dto: DepositDto) {
+        if (!dto.categoryId) throw new BadRequestException('account.category_required');
+
+        // Validate category exists and is income type
+        await this.validateCategory(tenantId, dto.categoryId, 'income');
+
         const account = await this.get(tenantId, accountId);
         const now = new Date().toISOString();
         account.balance += dto.amount;
@@ -65,6 +70,11 @@ export class AccountsService {
     }
 
     async withdraw(tenantId: string, actorId: string, accountId: string, dto: WithdrawDto) {
+        if (!dto.categoryId) throw new BadRequestException('account.category_required');
+
+        // Validate category exists and is expense type
+        await this.validateCategory(tenantId, dto.categoryId, 'expense');
+
         const account = await this.get(tenantId, accountId);
         if (account.balance < dto.amount) throw new BadRequestException('account.withdraw.insufficient_funds');
         const now = new Date().toISOString();
@@ -90,6 +100,11 @@ export class AccountsService {
 
     async transfer(tenantId: string, actorId: string, dto: TransferDto) {
         const { fromAccountId, toAccountId, amount, categoryId } = dto;
+        if (!categoryId) throw new BadRequestException('account.category_required');
+
+        // Validate category exists (transfer can use either income or expense category depending on context)
+        await this.validateCategory(tenantId, categoryId);
+
         const from = await this.get(tenantId, fromAccountId);
         const to = await this.get(tenantId, toAccountId);
         if (!from || !to) throw new NotFoundException('account.not_found');
@@ -198,6 +213,26 @@ export class AccountsService {
         };
         await this.db.insert(transaction);
         return transaction;
+    }
+
+    private async validateCategory(tenantId: string, categoryId: string, expectedType?: 'income' | 'expense') {
+        try {
+            const id = categoryId.includes(':') ? categoryId : `${tenantId}:category:${categoryId}`;
+            const category = await this.db.get(id);
+
+            if (!category || !category._id.includes(':category:')) {
+                throw new NotFoundException('account.category_invalid');
+            }
+
+            if (expectedType && category.type !== expectedType) {
+                throw new BadRequestException(`account.category_type_mismatch`);
+            }
+
+            return category;
+        } catch (err) {
+            if (err.statusCode === 404) throw new NotFoundException('account.category_invalid');
+            throw err;
+        }
     }
 
     async getTransactions(tenantId: string, accountId?: string) {

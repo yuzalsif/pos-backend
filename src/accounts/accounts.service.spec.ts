@@ -70,7 +70,12 @@ describe('AccountsService (unit)', () => {
 
     it('should deposit money and update balance, log', async () => {
         const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
-        mockDb.get.mockResolvedValue(account);
+        const category = { _id: 'tenant1:category:cat1', name: 'Sales', type: 'income' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':account:')) return Promise.resolve(account);
+            if (id.includes(':category:')) return Promise.resolve(category);
+            return Promise.reject({ statusCode: 404 });
+        });
         mockDb.insert.mockResolvedValue({ id: account._id, rev: '2-0' });
         const dto = { amount: 5000, categoryId: 'cat1' };
         const res = await accountsService.deposit('tenant1', 'user:1', 'abc', dto);
@@ -84,9 +89,45 @@ describe('AccountsService (unit)', () => {
         expect(mockLogs.record).toHaveBeenCalledWith('tenant1', { userId: 'user:1' }, 'account.deposit', 'account', account._id, dto);
     });
 
+    it('should not deposit without category', async () => {
+        const dto = { amount: 5000, categoryId: '' };
+        await expect(accountsService.deposit('tenant1', 'user:1', 'abc', dto)).rejects.toThrow(BadRequestException);
+        await expect(accountsService.deposit('tenant1', 'user:1', 'abc', dto)).rejects.toThrow('account.category_required');
+    });
+
+    it('should not deposit with invalid category', async () => {
+        const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':account:')) return Promise.resolve(account);
+            if (id.includes(':category:')) return Promise.reject({ statusCode: 404 });
+            return Promise.reject({ statusCode: 404 });
+        });
+        const dto = { amount: 5000, categoryId: 'invalid' };
+        await expect(accountsService.deposit('tenant1', 'user:1', 'abc', dto)).rejects.toThrow(NotFoundException);
+        await expect(accountsService.deposit('tenant1', 'user:1', 'abc', dto)).rejects.toThrow('account.category_invalid');
+    });
+
+    it('should not deposit with expense category', async () => {
+        const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
+        const category = { _id: 'tenant1:category:cat1', name: 'Rent', type: 'expense' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':account:')) return Promise.resolve(account);
+            if (id.includes(':category:')) return Promise.resolve(category);
+            return Promise.reject({ statusCode: 404 });
+        });
+        const dto = { amount: 5000, categoryId: 'cat1' };
+        await expect(accountsService.deposit('tenant1', 'user:1', 'abc', dto)).rejects.toThrow(BadRequestException);
+        await expect(accountsService.deposit('tenant1', 'user:1', 'abc', dto)).rejects.toThrow('account.category_type_mismatch');
+    });
+
     it('should withdraw money and update balance, log', async () => {
         const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
-        mockDb.get.mockResolvedValue(account);
+        const category = { _id: 'tenant1:category:cat2', name: 'Rent', type: 'expense' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':account:')) return Promise.resolve(account);
+            if (id.includes(':category:')) return Promise.resolve(category);
+            return Promise.reject({ statusCode: 404 });
+        });
         mockDb.insert.mockResolvedValue({ id: account._id, rev: '2-0' });
         const dto = { amount: 4000, categoryId: 'cat2' };
         const res = await accountsService.withdraw('tenant1', 'user:1', 'abc', dto);
@@ -100,9 +141,45 @@ describe('AccountsService (unit)', () => {
         expect(mockLogs.record).toHaveBeenCalledWith('tenant1', { userId: 'user:1' }, 'account.withdraw', 'account', account._id, dto);
     });
 
+    it('should not withdraw without category', async () => {
+        const dto = { amount: 4000, categoryId: '' };
+        await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow(BadRequestException);
+        await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow('account.category_required');
+    });
+
+    it('should not withdraw with invalid category', async () => {
+        const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':account:')) return Promise.resolve(account);
+            if (id.includes(':category:')) return Promise.reject({ statusCode: 404 });
+            return Promise.reject({ statusCode: 404 });
+        });
+        const dto = { amount: 4000, categoryId: 'invalid' };
+        await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow(NotFoundException);
+        await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow('account.category_invalid');
+    });
+
+    it('should not withdraw with income category', async () => {
+        const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
+        const category = { _id: 'tenant1:category:cat2', name: 'Sales', type: 'income' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':account:')) return Promise.resolve(account);
+            if (id.includes(':category:')) return Promise.resolve(category);
+            return Promise.reject({ statusCode: 404 });
+        });
+        const dto = { amount: 4000, categoryId: 'cat2' };
+        await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow(BadRequestException);
+        await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow('account.category_type_mismatch');
+    });
+
     it('should not withdraw more than balance', async () => {
-        const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 1000 };
-        mockDb.get.mockResolvedValue(account);
+        const account = { _id: 'tenant1:account:abc', name: 'NMB', balance: 1000, currency: 'TZS' };
+        const category = { _id: 'tenant1:category:cat2', name: 'Office', type: 'expense' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':account:')) return Promise.resolve(account);
+            if (id.includes(':category:')) return Promise.resolve(category);
+            return Promise.reject({ statusCode: 404 });
+        });
         const dto = { amount: 2000, categoryId: 'cat2' };
         await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow(BadRequestException);
         await expect(accountsService.withdraw('tenant1', 'user:1', 'abc', dto)).rejects.toThrow('account.withdraw.insufficient_funds');
@@ -112,9 +189,11 @@ describe('AccountsService (unit)', () => {
     it('should transfer money atomically between accounts and log', async () => {
         const fromAccount = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
         const toAccount = { _id: 'tenant1:account:def', name: 'CRDB', balance: 5000, currency: 'TZS' };
+        const category = { _id: 'tenant1:category:cat3', name: 'Transfer', type: 'expense' };
         mockDb.get.mockImplementation((id: string) => {
             if (id.endsWith('abc')) return Promise.resolve(fromAccount);
             if (id.endsWith('def')) return Promise.resolve(toAccount);
+            if (id.includes(':category:')) return Promise.resolve(category);
             return Promise.reject({ statusCode: 404 });
         });
         mockDb.insert.mockResolvedValue({ id: 'any', rev: '2-0' });
@@ -132,12 +211,30 @@ describe('AccountsService (unit)', () => {
         expect(mockLogs.record).toHaveBeenCalledWith('tenant1', { userId: 'user:1' }, 'account.transfer', 'account', expect.any(String), dto);
     });
 
+    it('should not transfer without category', async () => {
+        const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 3000, categoryId: '' };
+        await expect(accountsService.transfer('tenant1', 'user:1', dto)).rejects.toThrow(BadRequestException);
+        await expect(accountsService.transfer('tenant1', 'user:1', dto)).rejects.toThrow('account.category_required');
+    });
+
+    it('should not transfer with invalid category', async () => {
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':category:')) return Promise.reject({ statusCode: 404 });
+            return Promise.reject({ statusCode: 404 });
+        });
+        const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 3000, categoryId: 'invalid' };
+        await expect(accountsService.transfer('tenant1', 'user:1', dto)).rejects.toThrow(NotFoundException);
+        await expect(accountsService.transfer('tenant1', 'user:1', dto)).rejects.toThrow('account.category_invalid');
+    });
+
     it('should not transfer if currencies do not match', async () => {
         const fromAccount = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
-        const toAccount = { _id: 'tenant1:account:def', name: 'CRDB', balance: 5000, currency: 'USD' };
+        const toAccount = { _id: 'tenant1:account:def', name: 'KCB', balance: 5000, currency: 'KES' };
+        const category = { _id: 'tenant1:category:cat3', name: 'Transfer', type: 'expense' };
         mockDb.get.mockImplementation((id: string) => {
             if (id.endsWith('abc')) return Promise.resolve(fromAccount);
             if (id.endsWith('def')) return Promise.resolve(toAccount);
+            if (id.includes(':category:')) return Promise.resolve(category);
             return Promise.reject({ statusCode: 404 });
         });
         const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 1000, categoryId: 'cat3' };
@@ -148,9 +245,11 @@ describe('AccountsService (unit)', () => {
     it('should not transfer more than available in from account', async () => {
         const fromAccount = { _id: 'tenant1:account:abc', name: 'NMB', balance: 500, currency: 'TZS' };
         const toAccount = { _id: 'tenant1:account:def', name: 'CRDB', balance: 5000, currency: 'TZS' };
+        const category = { _id: 'tenant1:category:cat3', name: 'Transfer', type: 'expense' };
         mockDb.get.mockImplementation((id: string) => {
             if (id.endsWith('abc')) return Promise.resolve(fromAccount);
             if (id.endsWith('def')) return Promise.resolve(toAccount);
+            if (id.includes(':category:')) return Promise.resolve(category);
             return Promise.reject({ statusCode: 404 });
         });
         const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 1000, categoryId: 'cat3' };
@@ -159,7 +258,11 @@ describe('AccountsService (unit)', () => {
     });
 
     it('should not transfer if either account does not exist', async () => {
-        mockDb.get.mockImplementation((id: string) => Promise.reject({ statusCode: 404 }));
+        const category = { _id: 'tenant1:category:cat3', name: 'Transfer', type: 'expense' };
+        mockDb.get.mockImplementation((id: string) => {
+            if (id.includes(':category:')) return Promise.resolve(category);
+            return Promise.reject({ statusCode: 404 });
+        });
         const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 1000, categoryId: 'cat3' };
         await expect(accountsService.transfer('tenant1', 'user:1', dto)).rejects.toThrow(NotFoundException);
         await expect(accountsService.transfer('tenant1', 'user:1', dto)).rejects.toThrow('account.not_found');
@@ -169,9 +272,11 @@ describe('AccountsService (unit)', () => {
         // Simulate deduction from A succeeds, but credit to B fails
         const fromAccount = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
         const toAccount = { _id: 'tenant1:account:def', name: 'CRDB', balance: 5000, currency: 'TZS' };
+        const category = { _id: 'tenant1:category:cat3', name: 'Transfer', type: 'expense' };
         mockDb.get.mockImplementation((id: string) => {
             if (id.endsWith('abc')) return Promise.resolve({ ...fromAccount });
             if (id.endsWith('def')) return Promise.resolve({ ...toAccount });
+            if (id.includes(':category:')) return Promise.resolve(category);
             return Promise.reject({ statusCode: 404 });
         });
         // First insert (deduct from A) succeeds, second insert (credit to B) fails
@@ -199,9 +304,11 @@ describe('AccountsService (unit)', () => {
     it('should rollback transfer and delete transactions if transaction creation fails', async () => {
         const fromAccount = { _id: 'tenant1:account:abc', name: 'NMB', balance: 10000, currency: 'TZS' };
         const toAccount = { _id: 'tenant1:account:def', name: 'CRDB', balance: 5000, currency: 'TZS' };
+        const category = { _id: 'tenant1:category:cat3', name: 'Transfer', type: 'expense' };
         mockDb.get.mockImplementation((id: string) => {
             if (id.endsWith('abc')) return Promise.resolve({ ...fromAccount });
             if (id.endsWith('def')) return Promise.resolve({ ...toAccount });
+            if (id.includes(':category:')) return Promise.resolve(category);
             if (id.includes(':transaction:')) return Promise.resolve({ _id: id, _rev: '1-abc' });
             return Promise.reject({ statusCode: 404 });
         });

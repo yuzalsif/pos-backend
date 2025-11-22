@@ -52,12 +52,29 @@
         "create_failed": "Ntibyashobotse kubika ibyabaye. Gerageza nyuma.",
         "list_failed": "Ntibyashobotse kubona ibyabitswe. Gerageza nyuma."
     },
+    "category": {
+        "create": {
+            "duplicate": "Icyiciro gifite izina n'ubwoko bimwe kirabaho.",
+            "parent_type_mismatch": "Ubwoko bw'icyiciro gito bugomba guhuza n'ubwoko bw'icyiciro kikuru."
+        },
+        "not_found": "Icyiciro nticyabonetse.",
+        "update": {
+            "duplicate": "Icyiciro gifite izina n'ubwoko bimwe kirabaho."
+        },
+        "delete": {
+            "has_subcategories": "Ntushobora gusiba icyiciro gifite ibyiciro bito.",
+            "has_transactions": "Ntushobora gusiba icyiciro gikoreshwa mu mikorere."
+        }
+    },
     "account": {
         "create": {
             "negative_initial_balance": "Amafaranga y'itangira ntashobora kuba atariho.",
             "duplicate": "Konti ifite izina, ubwoko, n'ifaranga kimwe irabaho."
         },
         "not_found": "Konti ntiyabonetse.",
+        "category_required": "Icyiciro kirakenewe kuri uyu mukono.",
+        "category_invalid": "Icyiciro kitemewe. Icyiciro nticyabonetse.",
+        "category_type_mismatch": "Ubwoko bw'icyiciro ntabwo buhuza n'ubwoko bw'igikorwa.",
         "deposit": {
             "failed": "Ntibyashobotse gushyira amafaranga kuri konti. Gerageza nyuma."
         },

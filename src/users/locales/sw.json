@@ -52,12 +52,29 @@
         "create_failed": "Imeshindikana kuandika kumbukumbu. Tafadhali jaribu tena baadaye.",
         "list_failed": "Imeshindikana kupata kumbukumbu. Tafadhali jaribu tena baadaye."
     },
+    "category": {
+        "create": {
+            "duplicate": "Jamii yenye jina na aina hii tayari ipo.",
+            "parent_type_mismatch": "Aina ya jamii ndogo lazima ilingane na aina ya jamii kuu."
+        },
+        "not_found": "Jamii haikupatikana.",
+        "update": {
+            "duplicate": "Jamii yenye jina na aina hii tayari ipo."
+        },
+        "delete": {
+            "has_subcategories": "Huwezi kufuta jamii yenye jamii ndogo.",
+            "has_transactions": "Huwezi kufuta jamii inayotumika katika miamala."
+        }
+    },
     "account": {
         "create": {
             "negative_initial_balance": "Salio la mwanzo haliwezi kuwa hasi.",
             "duplicate": "Akaunti yenye jina, aina, na sarafu hiyo tayari ipo."
         },
         "not_found": "Akaunti haikupatikana.",
+        "category_required": "Jamii inahitajika kwa ajili ya shughuli hii.",
+        "category_invalid": "Jamii sio sahihi. Jamii haikupatikana.",
+        "category_type_mismatch": "Aina ya jamii hailingani na aina ya shughuli.",
         "deposit": {
             "failed": "Imeshindikana kuweka pesa kwenye akaunti. Tafadhali jaribu tena baadaye."
         },

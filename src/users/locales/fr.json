@@ -52,12 +52,29 @@
         "create_failed": "Échec de l'enregistrement du journal. Veuillez réessayer plus tard.",
         "list_failed": "Échec de la récupération des journaux. Veuillez réessayer plus tard."
     },
+    "category": {
+        "create": {
+            "duplicate": "Une catégorie avec ce nom et type existe déjà.",
+            "parent_type_mismatch": "Le type de sous-catégorie doit correspondre au type de catégorie parent."
+        },
+        "not_found": "Catégorie introuvable.",
+        "update": {
+            "duplicate": "Une catégorie avec ce nom et type existe déjà."
+        },
+        "delete": {
+            "has_subcategories": "Impossible de supprimer une catégorie avec des sous-catégories.",
+            "has_transactions": "Impossible de supprimer une catégorie utilisée dans des transactions."
+        }
+    },
     "account": {
         "create": {
             "negative_initial_balance": "Le solde initial ne peut pas être négatif.",
             "duplicate": "Un compte avec ce nom, type et devise existe déjà."
         },
         "not_found": "Compte introuvable.",
+        "category_required": "La catégorie est requise pour cette opération.",
+        "category_invalid": "Catégorie invalide. Catégorie introuvable.",
+        "category_type_mismatch": "Le type de catégorie ne correspond pas au type d'opération.",
         "deposit": {
             "failed": "Échec du dépôt sur le compte. Veuillez réessayer plus tard."
         },

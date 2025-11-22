@@ -52,12 +52,29 @@
         "create_failed": "Failed to record log. Please try again later.",
         "list_failed": "Failed to list logs. Please try again later."
     },
+    "category": {
+        "create": {
+            "duplicate": "A category with this name and type already exists.",
+            "parent_type_mismatch": "Subcategory type must match parent category type."
+        },
+        "not_found": "Category not found.",
+        "update": {
+            "duplicate": "A category with this name and type already exists."
+        },
+        "delete": {
+            "has_subcategories": "Cannot delete category with subcategories.",
+            "has_transactions": "Cannot delete category that is used in transactions."
+        }
+    },
     "account": {
         "create": {
             "negative_initial_balance": "Initial balance cannot be negative.",
             "duplicate": "An account with this name, type, and currency already exists."
         },
         "not_found": "Account not found.",
+        "category_required": "Category is required for this operation.",
+        "category_invalid": "Invalid category. Category not found.",
+        "category_type_mismatch": "Category type does not match operation type.",
         "deposit": {
             "failed": "Failed to deposit to account. Please try again later."
         },
