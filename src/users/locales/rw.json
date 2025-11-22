@@ -51,5 +51,23 @@
     "log": {
         "create_failed": "Ntibyashobotse kubika ibyabaye. Gerageza nyuma.",
         "list_failed": "Ntibyashobotse kubona ibyabitswe. Gerageza nyuma."
+    },
+    "account": {
+        "create": {
+            "negative_initial_balance": "Amafaranga y'itangira ntashobora kuba atariho.",
+            "duplicate": "Konti ifite izina, ubwoko, n'ifaranga kimwe irabaho."
+        },
+        "not_found": "Konti ntiyabonetse.",
+        "deposit": {
+            "failed": "Ntibyashobotse gushyira amafaranga kuri konti. Gerageza nyuma."
+        },
+        "withdraw": {
+            "insufficient_funds": "Amafaranga adahagije yo gukuraho."
+        },
+        "transfer": {
+            "currency_mismatch": "Ntabwo ushobora kwimurira hagati ya konti zifite amafaranga atandukanye.",
+            "insufficient_funds": "Amafaranga adahagije yo kwimura.",
+            "failed": "Kohereza byanze. Umukono w'igikorwa wasubijwe inyuma."
+        }
     }
 }

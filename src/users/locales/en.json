@@ -51,5 +51,23 @@
     "log": {
         "create_failed": "Failed to record log. Please try again later.",
         "list_failed": "Failed to list logs. Please try again later."
+    },
+    "account": {
+        "create": {
+            "negative_initial_balance": "Initial balance cannot be negative.",
+            "duplicate": "An account with this name, type, and currency already exists."
+        },
+        "not_found": "Account not found.",
+        "deposit": {
+            "failed": "Failed to deposit to account. Please try again later."
+        },
+        "withdraw": {
+            "insufficient_funds": "Insufficient funds for withdrawal."
+        },
+        "transfer": {
+            "currency_mismatch": "Cannot transfer between accounts with different currencies.",
+            "insufficient_funds": "Insufficient funds for transfer.",
+            "failed": "Transfer failed. Transaction has been rolled back."
+        }
     }
 }

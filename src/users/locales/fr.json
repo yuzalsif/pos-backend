@@ -51,5 +51,23 @@
     "log": {
         "create_failed": "Échec de l'enregistrement du journal. Veuillez réessayer plus tard.",
         "list_failed": "Échec de la récupération des journaux. Veuillez réessayer plus tard."
+    },
+    "account": {
+        "create": {
+            "negative_initial_balance": "Le solde initial ne peut pas être négatif.",
+            "duplicate": "Un compte avec ce nom, type et devise existe déjà."
+        },
+        "not_found": "Compte introuvable.",
+        "deposit": {
+            "failed": "Échec du dépôt sur le compte. Veuillez réessayer plus tard."
+        },
+        "withdraw": {
+            "insufficient_funds": "Fonds insuffisants pour le retrait."
+        },
+        "transfer": {
+            "currency_mismatch": "Impossible de transférer entre des comptes avec des devises différentes.",
+            "insufficient_funds": "Fonds insuffisants pour le transfert.",
+            "failed": "Le transfert a échoué. La transaction a été annulée."
+        }
     }
 }

@@ -51,5 +51,23 @@
     "log": {
         "create_failed": "Imeshindikana kuandika kumbukumbu. Tafadhali jaribu tena baadaye.",
         "list_failed": "Imeshindikana kupata kumbukumbu. Tafadhali jaribu tena baadaye."
+    },
+    "account": {
+        "create": {
+            "negative_initial_balance": "Salio la mwanzo haliwezi kuwa hasi.",
+            "duplicate": "Akaunti yenye jina, aina, na sarafu hiyo tayari ipo."
+        },
+        "not_found": "Akaunti haikupatikana.",
+        "deposit": {
+            "failed": "Imeshindikana kuweka pesa kwenye akaunti. Tafadhali jaribu tena baadaye."
+        },
+        "withdraw": {
+            "insufficient_funds": "Hana pesa za kutosha kwa ajili ya kutoa."
+        },
+        "transfer": {
+            "currency_mismatch": "Huwezi kuhamisha kati ya akaunti zenye sarafu tofauti.",
+            "insufficient_funds": "Hana pesa za kutosha kwa ajili ya uhamisho.",
+            "failed": "Uhamisho umefaula. Muamala umezirudi nyuma."
+        }
     }
 }
