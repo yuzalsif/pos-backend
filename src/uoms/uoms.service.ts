@@ -10,6 +10,8 @@ export class UomsService {
 
     constructor(
         @Inject(DATABASE_CONNECTION) private readonly db: nano.DocumentScope<any>,
+        // optional logs service will be injected by DI when available
+        private readonly logsService?: any,
     ) { }
 
     async create(tenantId: string, userId: string, dto: CreateUomDto) {
@@ -79,7 +81,18 @@ export class UomsService {
             };
 
             const res = await this.db.insert(uomDoc);
-            return { id: res.id, rev: res.rev, ...uomDoc };
+            const result = { id: res.id, rev: res.rev, ...uomDoc };
+
+            // record audit log (best-effort, don't fail request on logging errors)
+            try {
+                if (this.logsService) {
+                    await this.logsService.record(tenantId, { userId }, 'uom.create', 'uom', result.id, { code: dto.code });
+                }
+            } catch (e) {
+                this.logger.warn('Failed to record uom.create log', e as any);
+            }
+
+            return result;
         } catch (error) {
             if (error instanceof ConflictException) throw error;
             this.logger.error('Failed to create UoM', error as any);

@@ -14,6 +14,7 @@ export class UsersService {
     constructor(
         @Inject(DATABASE_CONNECTION) private readonly db: DocumentScope<any>,
         private readonly mailService?: MailService,
+        private readonly logsService?: any,
     ) { }
 
     private readonly logger = new Logger(UsersService.name);
@@ -45,6 +46,16 @@ export class UsersService {
         await this.db.insert(newUser);
 
         const { passwordHash: _, ...result } = newUser;
+
+        // record audit log (best-effort)
+        try {
+            if (this.logsService) {
+                await this.logsService.record(tenantId, { userId: result._id, name: result.name }, 'user.create', 'user', result._id, { role: result.role });
+            }
+        } catch (e) {
+            this.logger.warn('Failed to record user.create log', e as any);
+        }
+
         return result;
     }
 
@@ -95,6 +106,20 @@ export class UsersService {
         const createUserDto: CreateUserDto = { email, password, name, role: 'owner' } as any;
         const user = await this.create(tenantId, createUserDto);
 
+        // record tenant create and user create logs (best-effort)
+        try {
+            if (this.logsService) {
+                // tenant created by system during signup
+                if (createdTenant) {
+                    await this.logsService.record(tenantId, { userId: 'system' }, 'tenant.create', 'tenant', `tenant:${tenantId}`, { tenantId });
+                }
+                // user created (owner)
+                await this.logsService.record(tenantId, { userId: user._id, name: user.name }, 'user.create', 'user', user._id, { role: 'owner' });
+            }
+        } catch (e) {
+            this.logger.warn('Failed to record signupOwner logs', e as any);
+        }
+
         return { user, tenantId, tenantCreated: createdTenant };
     }
 
@@ -106,7 +131,17 @@ export class UsersService {
         }
 
         const createUserDto: CreateUserDto = { email, password, name, role: 'manager' } as any;
-        return this.create(tenantId, createUserDto);
+        const user = await this.create(tenantId, createUserDto);
+
+        try {
+            if (this.logsService) {
+                await this.logsService.record(tenantId, { userId: user._id, name: user.name }, 'user.create', 'user', user._id, { role: 'manager' });
+            }
+        } catch (e) {
+            this.logger.warn('Failed to record signupManager log', e as any);
+        }
+
+        return user;
     }
 
     async forgotPassword(payload: ForgotPasswordDto) {
@@ -130,6 +165,15 @@ export class UsersService {
             if (this.mailService) await this.mailService.sendResetPasswordEmail(email, tenantId, token, user.locale || 'en', user.name);
         } catch (err) {
             this.logger.error('Failed to send reset password email', err as any);
+        }
+
+        // record forgot password log (best-effort)
+        try {
+            if (this.logsService) {
+                await this.logsService.record(tenantId, { userId: user._id, name: user.name }, 'user.forgot_password', 'user', user._id);
+            }
+        } catch (e) {
+            this.logger.warn('Failed to record forgot password log', e as any);
         }
 
         return { ok: true };
@@ -159,6 +203,15 @@ export class UsersService {
         doc.updatedAt = new Date().toISOString();
 
         await this.db.insert(doc);
+
+        // record reset password log (best-effort)
+        try {
+            if (this.logsService) {
+                await this.logsService.record(tenantId, { userId: user._id, name: user.name }, 'user.reset_password', 'user', user._id);
+            }
+        } catch (e) {
+            this.logger.warn('Failed to record reset password log', e as any);
+        }
 
         return { ok: true };
     }

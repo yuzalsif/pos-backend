@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { I18nModule } from './i18n/i18n.module';
 import { UomsModule } from './uoms/uoms.module';
+import { LogsModule } from './logs/logs.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UomsModule } from './uoms/uoms.module';
     UsersModule,
     SuppliersModule,
     UomsModule,
+    LogsModule,
     DatabaseModule,
   ],
   controllers: [AppController],

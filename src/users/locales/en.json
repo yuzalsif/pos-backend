@@ -24,7 +24,10 @@
     },
     "product": {
         "sku_exists": "A product with this SKU already exists.",
-        "not_found": "Product not found."
+        "not_found": "Product not found.",
+        "create_failed": "Failed to create product. Please try again later.",
+        "update_failed": "Failed to update product. Please try again later.",
+        "uom_not_found": "Referenced unit of measure not found."
     },
     "database": {
         "env_missing": "Service configuration is incomplete. Please contact support.",
@@ -44,5 +47,9 @@
         "base_not_found": "Referenced base unit not found.",
         "invalid_factor": "Invalid conversion factor. Must be a positive number.",
         "base_exists": "A base unit already exists for this tenant."
+    },
+    "log": {
+        "create_failed": "Failed to record log. Please try again later.",
+        "list_failed": "Failed to list logs. Please try again later."
     }
 }

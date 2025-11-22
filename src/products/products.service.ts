@@ -10,6 +10,7 @@ export class ProductsService {
     private readonly logger = new Logger(ProductsService.name);
     constructor(
         @Inject(DATABASE_CONNECTION) private readonly db: DocumentScope<any>,
+        private readonly logsService?: any,
     ) { }
 
     async create(tenantId: string, userId: string, userName: string, createProductDto: CreateProductDto) {
@@ -84,7 +85,18 @@ export class ProductsService {
             // 4. Insert into the database
             const response = await this.db.insert(newProduct);
             // Note: purchase registration will be implemented later. For now, return product info.
-            return { id: response.id, rev: response.rev, ...newProduct };
+            const result = { id: response.id, rev: response.rev, ...newProduct };
+
+            // record audit log (best-effort)
+            try {
+                if (this.logsService) {
+                    await this.logsService.record(tenantId, { userId, name: userName }, 'product.create', 'product', result.id, { sku: createProductDto.sku });
+                }
+            } catch (e) {
+                this.logger.warn('Failed to record product.create log', e as any);
+            }
+
+            return result;
         } catch (error) {
             if (error instanceof ConflictException || error instanceof BadRequestException || error instanceof NotFoundException) throw error;
             this.logger.error('Failed to create product', error as any);
@@ -170,6 +182,14 @@ export class ProductsService {
             };
 
             const res = await this.db.insert(updated);
+            // record update log
+            try {
+                if (this.logsService) {
+                    await this.logsService.record(tenantId, { userId, name: userName }, 'product.update', 'product', res.id, { changedFields: Object.keys(updateDto) });
+                }
+            } catch (e) {
+                this.logger.warn('Failed to record product.update log', e as any);
+            }
             return { id: res.id, rev: res.rev, ...updated };
         } catch (error) {
             if (error instanceof ConflictException || error instanceof BadRequestException || error instanceof NotFoundException) throw error;

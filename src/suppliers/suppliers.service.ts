@@ -9,6 +9,7 @@ export class SuppliersService {
     private readonly logger = new Logger(SuppliersService.name);
     constructor(
         @Inject(DATABASE_CONNECTION) private readonly db: DocumentScope<any>,
+        private readonly logsService?: any,
     ) { }
 
     async create(tenantId: string, createSupplierDto: CreateSupplierDto, createdBy?: string) {
@@ -49,6 +50,15 @@ export class SuppliersService {
         } catch (err) {
             this.logger.error('Failed to create supplier', err as any);
             throw new InternalServerErrorException({ key: 'supplier.create_failed' });
+        }
+
+        // record supplier.create log (best-effort)
+        try {
+            if (this.logsService) {
+                await this.logsService.record(tenantId, { userId: createdBy || 'system' }, 'supplier.create', 'supplier', doc._id, { name, phone, email });
+            }
+        } catch (e) {
+            this.logger.warn('Failed to record supplier.create log', e as any);
         }
 
         const { _rev, ...result } = doc as any;

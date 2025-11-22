@@ -24,7 +24,10 @@
     },
     "product": {
         "sku_exists": "Icyo gicuruzwa gifite SKU kiriho cyamaze kubaho.",
-        "not_found": "Igicuruzwa nticyabonetse."
+        "not_found": "Igicuruzwa nticyabonetse.",
+        "create_failed": "Ntibyashobotse gushyiraho igicuruzwa. Gerageza nyuma.",
+        "update_failed": "Ntibyashobotse kuvugurura igicuruzwa. Gerageza nyuma.",
+        "uom_not_found": "Uburyo bwo gupima bwavuzwe ntibubonetse."
     },
     "database": {
         "env_missing": "Ibyerekeye serivisi ntibirangiye. Nyamuneka hamagara ubufasha.",
@@ -34,7 +37,8 @@
         "exists": "Umucuruzi ufite telefoni cyangwa email bingana asanzwe ahari.",
         "create_failed": "Ntibyashobotse gushyiraho umucuruzi. Gerageza nyuma.",
         "check_failed": "Ntibyashobotse gusuzuma niba umucuruzi atari mwene we. Gerageza nyuma.",
-        "list_failed": "Ntibyashobotse kubona urutonde rw'abacuruzi. Gerageza nyuma."
+        "list_failed": "Ntibyashobotse kubona urutonde rw'abacuruzi. Gerageza nyuma.",
+        "not_found": "Umucuruzi ntabonetse."
     },
     "uom": {
         "exists": "Uburyo bwo gupima bufite uwo mwirondoro busanzwe bubaho.",
@@ -43,5 +47,9 @@
         "base_not_found": "Uburyo bw'ibanze bavuze ntibubonetse.",
         "invalid_factor": "Ikigero cyo guhinduranya si cyiza. Kigomba kuba umubare uruta 0.",
         "base_exists": "Uburyo bw'ibanze busanzwe bubaho kuri tenant."
+    },
+    "log": {
+        "create_failed": "Ntibyashobotse kubika ibyabaye. Gerageza nyuma.",
+        "list_failed": "Ntibyashobotse kubona ibyabitswe. Gerageza nyuma."
     }
 }

@@ -24,7 +24,10 @@
     },
     "product": {
         "sku_exists": "Un produit avec ce SKU existe déjà.",
-        "not_found": "Produit introuvable."
+        "not_found": "Produit introuvable.",
+        "create_failed": "Échec de la création du produit. Veuillez réessayer plus tard.",
+        "update_failed": "Échec de la mise à jour du produit. Veuillez réessayer plus tard.",
+        "uom_not_found": "Unité de mesure introuvable."
     },
     "database": {
         "env_missing": "La configuration du service est incomplète. Veuillez contacter le support.",
@@ -34,7 +37,8 @@
         "exists": "Un fournisseur avec le même téléphone ou e-mail existe déjà.",
         "create_failed": "Échec de la création du fournisseur. Veuillez réessayer plus tard.",
         "check_failed": "Échec de la vérification de l'unicité du fournisseur. Veuillez réessayer plus tard.",
-        "list_failed": "Échec de la récupération de la liste des fournisseurs. Veuillez réessayer plus tard."
+        "list_failed": "Échec de la récupération de la liste des fournisseurs. Veuillez réessayer plus tard.",
+        "not_found": "Fournisseur introuvable."
     },
     "uom": {
         "exists": "Une unité de mesure avec ce code existe déjà.",
@@ -43,5 +47,9 @@
         "base_not_found": "L'unité de base référencée est introuvable.",
         "invalid_factor": "Facteur de conversion invalide. Doit être un nombre positif.",
         "base_exists": "Une unité de base existe déjà pour ce locataire."
+    },
+    "log": {
+        "create_failed": "Échec de l'enregistrement du journal. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la récupération des journaux. Veuillez réessayer plus tard."
     }
 }

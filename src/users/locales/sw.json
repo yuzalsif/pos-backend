@@ -24,7 +24,10 @@
     },
     "product": {
         "sku_exists": "Bidhaa yenye SKU hii tayari ipo.",
-        "not_found": "Bidhaa haikupatikana."
+        "not_found": "Bidhaa haikupatikana.",
+        "create_failed": "Imeshindikana kuunda bidhaa. Tafadhali jaribu tena baadaye.",
+        "update_failed": "Imeshindikana kusasisha bidhaa. Tafadhali jaribu tena baadaye.",
+        "uom_not_found": "Kitengo cha kipimo kilichotajwa hakipatikani."
     },
     "database": {
         "env_missing": "Usanidi wa huduma haujakamilika. Tafadhali wasiliana na msaada.",
@@ -34,7 +37,8 @@
         "exists": "Muuzaji mwenye nambari ya simu au barua pepe sawa tayari ipo.",
         "create_failed": "Imeshindikana kuunda muuzaji. Tafadhali jaribu tena baadaye.",
         "check_failed": "Imeshindikana kuthibitisha kuwa muuzaji hajatokana na mwingine. Tafadhali jaribu tena baadaye.",
-        "list_failed": "Imeshindikana kupata orodha ya wauzaji. Tafadhali jaribu tena baadaye."
+        "list_failed": "Imeshindikana kupata orodha ya wauzaji. Tafadhali jaribu tena baadaye.",
+        "not_found": "Muuzaji hayupo."
     },
     "uom": {
         "exists": "Kitengo cha kipimo chenye msimbo huo tayari kipo.",
@@ -43,5 +47,9 @@
         "base_not_found": "Kitengo cha msingi kilichotajwa hakipatikani.",
         "invalid_factor": "Kiwango cha uongofu si sahihi. Lazima kiwe nambari chanya.",
         "base_exists": "Kimo cha msingi tayari kipo kwa mteja huyu."
+    },
+    "log": {
+        "create_failed": "Imeshindikana kuandika kumbukumbu. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindikana kupata kumbukumbu. Tafadhali jaribu tena baadaye."
     }
 }
