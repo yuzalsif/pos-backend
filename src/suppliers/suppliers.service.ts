@@ -24,9 +24,12 @@ export class SuppliersService {
         try {
             const res = await this.db.partitionedFind(tenantId, { selector });
             if (res.docs && res.docs.length > 0) {
+                // duplicate found
                 throw new ConflictException({ key: 'supplier.exists' });
             }
         } catch (err) {
+            // If we threw a ConflictException above it will be caught here — rethrow it so callers see the correct error.
+            if (err instanceof ConflictException) throw err;
             this.logger.error('Failed checking existing supplier', err as any);
             throw new InternalServerErrorException({ key: 'supplier.check_failed' });
         }
