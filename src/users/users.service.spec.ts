@@ -63,4 +63,39 @@ describe('UsersService (unit)', () => {
         expect(result.email).toBe('u@x.com');
         // no spy to restore
     });
+
+    it('create without actor should not record logs and createdBy should be null', async () => {
+        mockDb.partitionedFind.mockResolvedValue({ docs: [] });
+        mockDb.insert.mockImplementation(async (doc: any) => ({ id: doc._id, rev: '1-' }));
+
+        const result = await usersService.create('tenantZ', { email: 'noactor@x.com', password: 'p', name: 'NoActor', role: 'manager' } as any);
+
+        expect(mockDb.insert).toHaveBeenCalled();
+        const inserted = mockDb.insert.mock.calls[0][0];
+        expect(inserted.createdBy).toBeNull();
+        expect(mockLogs.record).not.toHaveBeenCalled();
+        expect(result.email).toBe('noactor@x.com');
+    });
+
+    it('signupOwner with existing tenantId should record a single user.create log (no duplication)', async () => {
+        // ownerExists -> no owner
+        mockDb.partitionedFind.mockResolvedValue({ docs: [] });
+        // create user insert
+        mockDb.insert.mockResolvedValue({ id: 'tenantA:user:1', rev: '1-0' });
+
+        const res = await usersService.signupOwner({ tenantId: 'tenantA', email: 'owner@a.com', password: 'p', name: 'Owner' } as any);
+
+        // signupOwner should return user and tenantId
+        expect(res).toHaveProperty('user');
+        // logs should have been called exactly once for user.create (tenant.create not called because tenant provided)
+        expect(mockLogs.record).toHaveBeenCalledTimes(1);
+        expect(mockLogs.record).toHaveBeenCalledWith(
+            'tenantA',
+            { userId: expect.any(String), name: 'Owner' },
+            'user.create',
+            'user',
+            expect.any(String),
+            expect.any(Object),
+        );
+    });
 });

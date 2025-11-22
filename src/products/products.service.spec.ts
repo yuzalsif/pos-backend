@@ -92,4 +92,49 @@ describe('ProductsService (unit)', () => {
         expect(inserted.updatedBy).toEqual({ userId: 'actor:1', name: 'Actor Name' });
         expect(typeof inserted.createdAt).toBe('string');
     });
+
+    it('update should throw NotFoundException when product does not exist', async () => {
+        // simulate db.get throwing 404
+        mockDb.get.mockImplementation(async (id: string) => {
+            const err: any = new Error('Not found');
+            err.statusCode = 404;
+            throw err;
+        });
+
+        await expect(
+            productsService.update('tenantX', 'actor:1', 'Actor', 'missing-id', { name: 'New' } as any),
+        ).rejects.toThrow(NotFoundException);
+    });
+
+    it('update should set updatedBy and record product.update log', async () => {
+        const existing = {
+            _id: 'tenantX:product:abc',
+            type: 'product',
+            tenantId: 'tenantX',
+            name: 'Old',
+            sku: 'OLD',
+            unitsOfMeasure: [],
+            updatedAt: '2020-01-01T00:00:00.000Z',
+        };
+
+        mockDb.get.mockResolvedValue(existing);
+        mockDb.partitionedFind.mockResolvedValue({ docs: [] });
+        mockDb.insert.mockResolvedValue({ id: existing._id, rev: '2-abc' });
+
+        const updateDto: any = { name: 'Updated', sku: 'OLD' };
+
+        const res = await productsService.update('tenantX', 'actor:1', 'Actor Name', 'abc', updateDto);
+
+        // insert called
+        expect(mockDb.insert).toHaveBeenCalled();
+
+        const updatedDoc = mockDb.insert.mock.calls[0][0];
+        expect(updatedDoc.updatedBy).toEqual({ userId: 'actor:1', name: 'Actor Name' });
+        expect(updatedDoc.updatedAt).not.toBe(existing.updatedAt);
+
+        // log recorded with changedFields
+        expect(mockLogs.record).toHaveBeenCalledWith('tenantX', { userId: 'actor:1', name: 'Actor Name' }, 'product.update', 'product', existing._id, { changedFields: Object.keys(updateDto) });
+
+        expect(res.id).toBe(existing._id);
+    });
 });
