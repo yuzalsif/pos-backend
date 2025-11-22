@@ -1,9 +1,15 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import type nano from 'nano';
+import { DATABASE_CONNECTION } from '../database/database.constants';
+import { LogsService } from '../logs/logs.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 
 @Injectable()
 export class CategoriesService {
-    constructor(private readonly db: any, private readonly logs: any) { }
+    constructor(
+        @Inject(DATABASE_CONNECTION) private readonly db: nano.DocumentScope<any>,
+        private readonly logs: LogsService,
+    ) { }
 
     async create(tenantId: string, actorId: string, dto: CreateCategoryDto) {
         const { name, type, parentCategoryId, description } = dto;
@@ -49,7 +55,7 @@ export class CategoriesService {
     }
 
     async list(tenantId: string, type?: 'income' | 'expense') {
-        const selector = type ? { type } : {};
+        const selector: any = type ? { type } : {};
         const res = await this.db.partitionedFind(tenantId, { selector });
         return res.docs.filter((doc: any) => doc._id.includes(':category:'));
     }

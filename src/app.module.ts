@@ -11,6 +11,7 @@ import { I18nModule } from './i18n/i18n.module';
 import { UomsModule } from './uoms/uoms.module';
 import { LogsModule } from './logs/logs.module';
 import { AccountsModule } from './accounts/accounts.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AccountsModule } from './accounts/accounts.module';
     UomsModule,
     LogsModule,
     AccountsModule,
+    CategoriesModule,
     DatabaseModule,
   ],
   controllers: [AppController],
