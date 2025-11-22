@@ -14,13 +14,14 @@ export class UsersController {
     @UseGuards(AuthGuard)
     @Post()
     create(@Body() createUserDto: CreateUserDto, @Req() req: RequestWithUser) {
-        const { tenantId, role } = req.user;
+        const { tenantId, role, userId, name } = req.user;
 
         if (role !== 'owner' && role !== 'manager') {
             throw new UnauthorizedException({ key: 'auth.no_permission' });
         }
 
-        return this.usersService.create(tenantId, createUserDto);
+        // pass the authenticated actor into the service so audit logs and createdBy are accurate
+        return this.usersService.create(tenantId, createUserDto, { userId, name });
     }
 
     // Public signup for owner - only allowed if tenant has no owner yet

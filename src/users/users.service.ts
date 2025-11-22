@@ -19,7 +19,7 @@ export class UsersService {
 
     private readonly logger = new Logger(UsersService.name);
 
-    async create(tenantId: string, createUserDto: CreateUserDto) {
+    async create(tenantId: string, createUserDto: CreateUserDto, actor?: { userId?: string; name?: string }) {
         const { email, password, name, role } = createUserDto;
 
         const existing = await this.findByEmail(tenantId, email);
@@ -40,17 +40,19 @@ export class UsersService {
             name,
             role,
             createdAt: now,
+            createdBy: actor ? { userId: actor.userId, name: actor.name } : null,
             updatedAt: now,
+            updatedBy: actor ? { userId: actor.userId, name: actor.name } : null,
         };
 
         await this.db.insert(newUser);
 
         const { passwordHash: _, ...result } = newUser;
 
-        // record audit log (best-effort)
+        // record audit log (best-effort) only when an actor is present (caller created the user)
         try {
-            if (this.logsService) {
-                await this.logsService.record(tenantId, { userId: result._id, name: result.name }, 'user.create', 'user', result._id, { role: result.role });
+            if (this.logsService && actor && actor.userId) {
+                await this.logsService.record(tenantId, { userId: actor.userId, name: actor.name }, 'user.create', 'user', result._id, { role: result.role });
             }
         } catch (e) {
             this.logger.warn('Failed to record user.create log', e as any);
