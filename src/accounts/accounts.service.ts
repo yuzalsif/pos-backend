@@ -1,9 +1,15 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import type nano from 'nano';
+import { DATABASE_CONNECTION } from '../database/database.constants';
+import { LogsService } from '../logs/logs.service';
 import { CreateAccountDto, DepositDto, WithdrawDto, TransferDto } from './dto/account.dto';
 
 @Injectable()
 export class AccountsService {
-    constructor(private readonly db: any, private readonly logs: any) { }
+    constructor(
+        @Inject(DATABASE_CONNECTION) private readonly db: nano.DocumentScope<any>,
+        private readonly logs: LogsService,
+    ) { }
 
     async create(tenantId: string, actorId: string, dto: CreateAccountDto) {
         const { name, initialBalance, type, currency } = dto;
@@ -236,7 +242,7 @@ export class AccountsService {
     }
 
     async getTransactions(tenantId: string, accountId?: string) {
-        const selector = accountId ? { accountId: `${tenantId}:account:${accountId}` } : {};
+        const selector: any = accountId ? { accountId: `${tenantId}:account:${accountId}` } : {};
         const res = await this.db.partitionedFind(tenantId, {
             selector,
             sort: [{ timestamp: 'desc' }]

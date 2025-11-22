@@ -10,6 +10,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { I18nModule } from './i18n/i18n.module';
 import { UomsModule } from './uoms/uoms.module';
 import { LogsModule } from './logs/logs.module';
+import { AccountsModule } from './accounts/accounts.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { LogsModule } from './logs/logs.module';
     SuppliersModule,
     UomsModule,
     LogsModule,
+    AccountsModule,
     DatabaseModule,
   ],
   controllers: [AppController],

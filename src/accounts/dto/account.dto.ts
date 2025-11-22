@@ -1,23 +1,57 @@
-export interface CreateAccountDto {
+import { IsString, IsNumber, IsNotEmpty, Min } from 'class-validator';
+
+export class CreateAccountDto {
+    @IsString()
+    @IsNotEmpty()
     name: string;
+
+    @IsNumber()
+    @Min(0)
     initialBalance: number;
+
+    @IsString()
+    @IsNotEmpty()
     type: string;
+
+    @IsString()
+    @IsNotEmpty()
     currency: string;
 }
 
-export interface DepositDto {
+export class DepositDto {
+    @IsNumber()
+    @Min(1)
     amount: number;
+
+    @IsString()
+    @IsNotEmpty()
     categoryId: string;
 }
 
-export interface WithdrawDto {
+export class WithdrawDto {
+    @IsNumber()
+    @Min(1)
     amount: number;
+
+    @IsString()
+    @IsNotEmpty()
     categoryId: string;
 }
 
-export interface TransferDto {
+export class TransferDto {
+    @IsString()
+    @IsNotEmpty()
     fromAccountId: string;
+
+    @IsString()
+    @IsNotEmpty()
     toAccountId: string;
+
+    @IsNumber()
+    @Min(1)
     amount: number;
+
+    @IsString()
+    @IsNotEmpty()
     categoryId: string;
 }
