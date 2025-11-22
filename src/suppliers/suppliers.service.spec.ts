@@ -37,6 +37,10 @@ describe('SuppliersService (unit)', () => {
         expect(res.phone).toBe('999');
         expect(res.email).toBe('s@x.com');
 
+        // ensure inserted doc carries createdBy value
+        const inserted = mockDb.insert.mock.calls[0][0];
+        expect(inserted.createdBy).toBe('creator:1');
+
         // assert logs recorded
         expect(mockLogs.record).toHaveBeenCalledTimes(1);
         expect(mockLogs.record).toHaveBeenCalledWith(
