@@ -49,6 +49,26 @@ describe('SuppliersService (unit)', () => {
         );
     });
 
+    it("create without createdBy should record log with actor 'system'", async () => {
+        mockDb.partitionedFind.mockResolvedValue({ docs: [] });
+        mockDb.insert.mockResolvedValue({ ok: true, id: 'tenant1:supplier:def', rev: '1-yyy' });
+
+        const res = await suppliersService.create('tenant1', { name: 'SysSup', phone: '111' } as any);
+
+        expect(mockDb.insert).toHaveBeenCalled();
+        expect(res.name).toBe('SysSup');
+
+        expect(mockLogs.record).toHaveBeenCalledTimes(1);
+        expect(mockLogs.record).toHaveBeenCalledWith(
+            'tenant1',
+            { userId: 'system' },
+            'supplier.create',
+            'supplier',
+            expect.stringContaining('tenant1:supplier:'),
+            { name: 'SysSup', phone: '111', email: undefined },
+        );
+    });
+
     it('findAll should return supplier docs list', async () => {
         const docs = [{ _id: 'tenant1:supplier:1', name: 'S1' }, { _id: 'tenant1:supplier:2', name: 'S2' }];
         mockDb.partitionedFind.mockResolvedValue({ docs });
