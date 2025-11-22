@@ -94,7 +94,8 @@ export class UomsService {
 
             return result;
         } catch (error) {
-            if (error instanceof ConflictException) throw error;
+            // Rethrow known client errors so callers receive proper HTTP status codes
+            if (error instanceof ConflictException || error instanceof BadRequestException) throw error;
             this.logger.error('Failed to create UoM', error as any);
             throw new InternalServerErrorException({ key: 'uom.create_failed' });
         }
