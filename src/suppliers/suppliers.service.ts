@@ -17,9 +17,7 @@ export class SuppliersService {
         }
         const { name, phone, email, address } = createSupplierDto;
 
-        // Ensure supplier with same phone or email doesn't already exist in tenant
         const selector: any = { type: 'supplier' };
-        // check by phone
         selector.$or = [{ phone }, { email }];
 
         try {
@@ -28,7 +26,6 @@ export class SuppliersService {
                 throw new ConflictException({ key: 'supplier.exists' });
             }
         } catch (err) {
-            // If partitionedFind throws, log and return a generic error to the client
             this.logger.error('Failed checking existing supplier', err as any);
             throw new InternalServerErrorException({ key: 'supplier.check_failed' });
         }

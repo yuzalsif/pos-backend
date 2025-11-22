@@ -1,34 +1,48 @@
 import { Type } from 'class-transformer';
 import {
-    IsString, IsNotEmpty, IsNumber, IsBoolean, IsArray,
-    ValidateNested, Min, ArrayMinSize
+    IsString,
+    IsNotEmpty,
+    IsNumber,
+    IsBoolean,
+    IsArray,
+    ValidateNested,
+    Min,
+    ArrayMinSize,
+    IsOptional,
 } from 'class-validator';
 
-class PriceTier {
-    @IsString()
-    @IsNotEmpty()
-    name: 'retail' | 'wholesale' | 'dealer'; 
+// Price tiers are explicit per UoM for a product. Store values in the tenant's
+// currency minor unit (e.g., cents) or agreed integer unit to avoid float issues.
+class PriceTiersDto {
     @IsNumber()
     @Min(0)
-    price: number;
-}
-
-class UnitOfMeasure {
-    @IsString()
-    @IsNotEmpty()
-    name: string; 
+    retail: number;
 
     @IsNumber()
-    @Min(1)
-    // How many of the base unit this UoM contains. Base unit (e.g., "Piece") is 1.
-    // A "Case" might have a factor of 12.
-    factor: number;
+    @Min(0)
+    wholesale: number;
 
-    @IsArray()
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true })
-    @Type(() => PriceTier)
-    priceTiers: PriceTier[];
+    @IsNumber()
+    @Min(0)
+    dealer: number;
+}
+
+class ProductUnitDto {
+    // Reference to a master UoM document (tenant-scoped). Service should validate
+    // that this uomId exists and belongs to the same tenant.
+    @IsString()
+    @IsNotEmpty()
+    uomId: string;
+
+    // Optional override or cached conversion factor to product base unit.
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    factor?: number;
+
+    @ValidateNested()
+    @Type(() => PriceTiersDto)
+    priceTiers: PriceTiersDto;
 }
 
 export class CreateProductDto {
@@ -36,6 +50,7 @@ export class CreateProductDto {
     @IsNotEmpty()
     name: string;
 
+    @IsOptional()
     @IsString()
     description?: string;
 
@@ -43,15 +58,22 @@ export class CreateProductDto {
     @IsNotEmpty()
     sku: string;
 
+    @IsOptional()
     @IsString()
-    category: string;
+    category?: string;
 
     @IsBoolean()
     isActive: boolean;
 
+    // Discount amount applied to the product base price (in minor units). Optional.
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    discountAmount?: number;
+
     @IsArray()
     @ArrayMinSize(1)
     @ValidateNested({ each: true })
-    @Type(() => UnitOfMeasure)
-    unitsOfMeasure: UnitOfMeasure[];
+    @Type(() => ProductUnitDto)
+    unitsOfMeasure: ProductUnitDto[];
 }

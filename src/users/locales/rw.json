@@ -35,5 +35,13 @@
         "create_failed": "Ntibyashobotse gushyiraho umucuruzi. Gerageza nyuma.",
         "check_failed": "Ntibyashobotse gusuzuma niba umucuruzi atari mwene we. Gerageza nyuma.",
         "list_failed": "Ntibyashobotse kubona urutonde rw'abacuruzi. Gerageza nyuma."
+    },
+    "uom": {
+        "exists": "Uburyo bwo gupima bufite uwo mwirondoro busanzwe bubaho.",
+        "create_failed": "Ntibyashobotse gushyiraho uburyo bwo gupima. Gerageza nyuma.",
+        "list_failed": "Ntibyashobotse kubona uburyo bwo gupima. Gerageza nyuma.",
+        "base_not_found": "Uburyo bw'ibanze bavuze ntibubonetse.",
+        "invalid_factor": "Ikigero cyo guhinduranya si cyiza. Kigomba kuba umubare uruta 0.",
+        "base_exists": "Uburyo bw'ibanze busanzwe bubaho kuri tenant."
     }
 }

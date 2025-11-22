@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { I18nModule } from './i18n/i18n.module';
+import { UomsModule } from './uoms/uoms.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { I18nModule } from './i18n/i18n.module';
     AuthModule,
     UsersModule,
     SuppliersModule,
+    UomsModule,
     DatabaseModule,
   ],
   controllers: [AppController],

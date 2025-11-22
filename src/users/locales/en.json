@@ -35,5 +35,13 @@
         "create_failed": "Failed to create supplier. Please try again later.",
         "check_failed": "Failed to validate supplier uniqueness. Please try again later.",
         "list_failed": "Failed to list suppliers. Please try again later."
+    },
+    "uom": {
+        "exists": "A unit of measure with this code already exists.",
+        "create_failed": "Failed to create unit of measure. Please try again later.",
+        "list_failed": "Failed to list units of measure. Please try again later.",
+        "base_not_found": "Referenced base unit not found.",
+        "invalid_factor": "Invalid conversion factor. Must be a positive number.",
+        "base_exists": "A base unit already exists for this tenant."
     }
 }

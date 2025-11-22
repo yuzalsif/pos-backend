@@ -35,5 +35,13 @@
         "create_failed": "Échec de la création du fournisseur. Veuillez réessayer plus tard.",
         "check_failed": "Échec de la vérification de l'unicité du fournisseur. Veuillez réessayer plus tard.",
         "list_failed": "Échec de la récupération de la liste des fournisseurs. Veuillez réessayer plus tard."
+    },
+    "uom": {
+        "exists": "Une unité de mesure avec ce code existe déjà.",
+        "create_failed": "Échec de la création de l'unité de mesure. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la récupération des unités de mesure. Veuillez réessayer plus tard.",
+        "base_not_found": "L'unité de base référencée est introuvable.",
+        "invalid_factor": "Facteur de conversion invalide. Doit être un nombre positif.",
+        "base_exists": "Une unité de base existe déjà pour ce locataire."
     }
 }

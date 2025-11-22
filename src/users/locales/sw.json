@@ -35,5 +35,13 @@
         "create_failed": "Imeshindikana kuunda muuzaji. Tafadhali jaribu tena baadaye.",
         "check_failed": "Imeshindikana kuthibitisha kuwa muuzaji hajatokana na mwingine. Tafadhali jaribu tena baadaye.",
         "list_failed": "Imeshindikana kupata orodha ya wauzaji. Tafadhali jaribu tena baadaye."
+    },
+    "uom": {
+        "exists": "Kitengo cha kipimo chenye msimbo huo tayari kipo.",
+        "create_failed": "Imeshindikana kuunda kitengo cha kipimo. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindikana kupata vitengo vya kipimo. Tafadhali jaribu tena baadaye.",
+        "base_not_found": "Kitengo cha msingi kilichotajwa hakipatikani.",
+        "invalid_factor": "Kiwango cha uongofu si sahihi. Lazima kiwe nambari chanya.",
+        "base_exists": "Kimo cha msingi tayari kipo kwa mteja huyu."
     }
 }
