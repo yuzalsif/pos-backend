@@ -21,10 +21,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
             if (typeof res === 'string') {
                 message = res;
             } else if (typeof res === 'object' && res !== null) {
-                // If the exception response contains a 'message' property, use it
-                // It can be a translation key.
+                // Support structured exception bodies: { key: 'translation.key', vars: {...} }
+                // or legacy { message: 'some.string' }
                 // @ts-ignore
-                message = res.message || res.error || message;
+                if ((res as any).key) {
+                    // keep key in message variable so later we detect it as a translation key
+                    // @ts-ignore
+                    message = { key: (res as any).key, vars: (res as any).vars };
+                } else {
+                    // @ts-ignore
+                    message = res.message || res.error || message;
+                }
             }
         } else if (exception instanceof Error) {
             message = exception.message;
@@ -34,9 +41,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const accept = request.headers['accept-language'] || 'en';
         const locale = (Array.isArray(accept) ? accept[0] : accept).split(',')[0].split('-')[0] || 'en';
 
-        // If message looks like a translation key (no spaces), try to translate
-        let translated = message;
-        if (typeof message === 'string' && !message.includes(' ')) {
+        // Resolve translation. Support structured message { key, vars } or string keys.
+        let translated: any = message;
+        if (typeof message === 'object' && message !== null && (message as any).key) {
+            translated = this.i18n.t((message as any).key, locale as string, (message as any).vars);
+        } else if (typeof message === 'string' && !message.includes(' ')) {
             translated = this.i18n.t(message, locale as string);
         }
 

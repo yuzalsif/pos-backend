@@ -16,7 +16,7 @@ export class ProductsService {
             selector: { type: 'product', sku: createProductDto.sku },
         });
         if (existing.docs.length > 0) {
-            throw new ConflictException(`Product with SKU '${createProductDto.sku}' already exists.`);
+            throw new ConflictException({ key: 'product.sku_exists', vars: { sku: createProductDto.sku } });
         }
 
         // 2. Construct the new document
@@ -43,7 +43,7 @@ export class ProductsService {
             return doc;
         } catch (error) {
             if (error.statusCode === 404) {
-                throw new NotFoundException(`Product with ID '${id}' not found.`);
+                throw new NotFoundException({ key: 'product.not_found', vars: { id } });
             }
             throw error;
         }

@@ -38,7 +38,7 @@ export class AuthGuard implements CanActivate {
         const token = this.extractTokenFromHeader(request);
 
         if (!token) {
-            throw new UnauthorizedException('Authentication token not found.');
+            throw new UnauthorizedException({ key: 'auth.token_not_found' });
         }
 
         try {
@@ -46,17 +46,17 @@ export class AuthGuard implements CanActivate {
             const decodedPayload: unknown = jwt.verify(token, this.jwtSecret);
 
             if (!this.isValidPayload(decodedPayload)) {
-                throw new UnauthorizedException('Invalid token payload.');
+                throw new UnauthorizedException({ key: 'auth.invalid_token_payload' });
             }
 
             request.user = decodedPayload;
 
         } catch (error) {
             if (error instanceof jwt.TokenExpiredError) {
-                throw new UnauthorizedException('Token has expired.');
+                throw new UnauthorizedException({ key: 'auth.token_expired' });
             }
             if (error instanceof jwt.JsonWebTokenError) {
-                throw new UnauthorizedException('Invalid token.');
+                throw new UnauthorizedException({ key: 'auth.invalid_token' });
             }
             throw error;
         }

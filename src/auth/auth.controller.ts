@@ -10,7 +10,7 @@ export class AuthController {
     async login(@Param('tenantId') tenantId: string, @Body() loginDto: LoginDto) {
         const user = await this.authService.validateUser(tenantId, loginDto.email, loginDto.password);
         if (!user) {
-            throw new UnauthorizedException('Invalid credentials.');
+            throw new UnauthorizedException({ key: 'auth.invalid_credentials' });
         }
         return this.authService.login(user);
     }

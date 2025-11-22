@@ -3,16 +3,37 @@
         "subject": "Reset your password"
     },
     "tenant": {
-        "create_failed": "Failed to create tenant. Please try again later."
+        "create_failed": "Failed to create tenant. Please try again later.",
+        "owner_exists": "An owner already exists for this tenant.",
+        "missing": "Tenant information is required."
     },
     "mail": {
         "send_failed": "Failed to send email."
     },
     "auth": {
+        "invalid_credentials": "Invalid credentials.",
+        "no_permission": "You do not have permission to perform this action.",
+        "token_not_found": "Authentication token not found.",
+        "invalid_token_payload": "Invalid token payload.",
+        "token_expired": "Authentication token has expired.",
         "invalid_token": "Invalid or expired token."
+    },
+    "user": {
+        "email_exists": "A user with this email already exists.",
+        "manager_tenant_required": "tenantId is required to signup a manager."
+    },
+    "product": {
+        "sku_exists": "A product with this SKU already exists.",
+        "not_found": "Product not found."
     },
     "database": {
         "env_missing": "Service configuration is incomplete. Please contact support.",
         "connect_failed": "Service temporarily unavailable. Please try again later."
+    },
+    "supplier": {
+        "exists": "A supplier with the same phone or email already exists.",
+        "create_failed": "Failed to create supplier. Please try again later.",
+        "check_failed": "Failed to validate supplier uniqueness. Please try again later.",
+        "list_failed": "Failed to list suppliers. Please try again later."
     }
 }

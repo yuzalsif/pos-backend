@@ -3,16 +3,37 @@
         "subject": "Ongerera ijambo ry'ibanga ryawe"
     },
     "tenant": {
-        "create_failed": "Ntibyashobotse gushyiraho tenant. Gerageza nyuma."
+        "create_failed": "Ntibyashobotse gushyiraho tenant. Gerageza nyuma.",
+        "owner_exists": "An owner already exists for this tenant.",
+        "missing": "Tenant information is required."
     },
     "mail": {
         "send_failed": "Ntibyashobotse kohereza email."
     },
     "auth": {
+        "invalid_credentials": "Invalid credentials.",
+        "no_permission": "You do not have permission to perform this action.",
+        "token_not_found": "Authentication token not found.",
+        "invalid_token_payload": "Invalid token payload.",
+        "token_expired": "Authentication token has expired.",
         "invalid_token": "Ikarita (token) siyo cyangwa imaze igihe."
+    },
+    "user": {
+        "email_exists": "Umukoresha ufite iyo imeyili asanzwe ahari.",
+        "manager_tenant_required": "tenantId irakenewe kugirango wiyandikishe nka manager."
+    },
+    "product": {
+        "sku_exists": "Icyo gicuruzwa gifite SKU kiriho cyamaze kubaho.",
+        "not_found": "Igicuruzwa nticyabonetse."
     },
     "database": {
         "env_missing": "Ibyerekeye serivisi ntibirangiye. Nyamuneka hamagara ubufasha.",
         "connect_failed": "Serivisi yabuze ubu. Nyamuneka gerageza nyuma."
+    },
+    "supplier": {
+        "exists": "Umucuruzi ufite telefoni cyangwa email bingana asanzwe ahari.",
+        "create_failed": "Ntibyashobotse gushyiraho umucuruzi. Gerageza nyuma.",
+        "check_failed": "Ntibyashobotse gusuzuma niba umucuruzi atari mwene we. Gerageza nyuma.",
+        "list_failed": "Ntibyashobotse kubona urutonde rw'abacuruzi. Gerageza nyuma."
     }
 }

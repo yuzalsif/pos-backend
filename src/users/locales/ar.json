@@ -3,16 +3,37 @@
         "subject": "إعادة تعيين كلمة المرور"
     },
     "tenant": {
-        "create_failed": "فشل في إنشاء المستأجر. حاول مرة أخرى لاحقًا."
+        "create_failed": "فشل في إنشاء المستأجر. حاول مرة أخرى لاحقًا.",
+        "owner_exists": "An owner already exists for this tenant.",
+        "missing": "Tenant information is required."
     },
     "mail": {
         "send_failed": "فشل في إرسال البريد الإلكتروني."
     },
     "auth": {
+        "invalid_credentials": "Invalid credentials.",
+        "no_permission": "You do not have permission to perform this action.",
+        "token_not_found": "Authentication token not found.",
+        "invalid_token_payload": "Invalid token payload.",
+        "token_expired": "Authentication token has expired.",
         "invalid_token": "الرمز غير صالح أو منتهي."
+    },
+    "user": {
+        "email_exists": "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
+        "manager_tenant_required": "مطلوب tenantId لتسجيل المدير."
+    },
+    "product": {
+        "sku_exists": "منتج بهذه الـ SKU موجود بالفعل.",
+        "not_found": "المنتج غير موجود."
     },
     "database": {
         "env_missing": "تكوين الخدمة غير مكتمل. الرجاء الاتصال بالدعم.",
         "connect_failed": "الخدمة غير متاحة مؤقتًا. حاول مرة أخرى لاحقًا."
+    },
+    "supplier": {
+        "exists": "مورد بنفس رقم الهاتف أو البريد الإلكتروني موجود بالفعل.",
+        "create_failed": "فشل في إنشاء المورد. الرجاء المحاولة لاحقًا.",
+        "check_failed": "فشل في التحقق من تفرد المورد. الرجاء المحاولة لاحقًا.",
+        "list_failed": "فشل في جلب قائمة الموردين. الرجاء المحاولة لاحقًا."
     }
 }

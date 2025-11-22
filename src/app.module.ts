@@ -6,6 +6,7 @@ import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
+import { SuppliersModule } from './suppliers/suppliers.module';
 import { I18nModule } from './i18n/i18n.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { I18nModule } from './i18n/i18n.module';
     ProductsModule,
     AuthModule,
     UsersModule,
+    SuppliersModule,
     DatabaseModule,
   ],
   controllers: [AppController],

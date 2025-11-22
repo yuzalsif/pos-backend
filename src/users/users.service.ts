@@ -23,7 +23,7 @@ export class UsersService {
 
         const existing = await this.findByEmail(tenantId, email);
         if (existing) {
-            throw new ConflictException(`User with email '${email}' already exists.`);
+            throw new ConflictException({ key: 'user.email_exists', vars: { email } });
         }
 
         const saltRounds = 10;
@@ -69,7 +69,6 @@ export class UsersService {
     async signupOwner(signup: SignupDto) {
         let { tenantId, email, password, name } = signup;
 
-        // If no tenantId provided, generate one and create a tenant record.
         let createdTenant = false;
         if (!tenantId) {
             tenantId = uuidv4();
@@ -82,23 +81,20 @@ export class UsersService {
             };
 
             try {
-                // insert tenant doc; if it exists we'll get a conflict, which is unlikely
                 await this.db.insert(tenantDoc);
             } catch (err) {
-                // Fail fast: propagate a clear error so API returns an explicit failure
                 this.logger.error('Failed to create tenant doc', err as any);
                 throw new InternalServerErrorException('tenant.create_failed');
             }
         }
 
         if (await this.ownerExists(tenantId)) {
-            throw new ConflictException(`Owner already exists for tenant '${tenantId}'.`);
+            throw new ConflictException({ key: 'tenant.owner_exists', vars: { tenantId } });
         }
 
         const createUserDto: CreateUserDto = { email, password, name, role: 'owner' } as any;
         const user = await this.create(tenantId, createUserDto);
 
-        // Return the created user and tenantId (useful when tenant was auto-created)
         return { user, tenantId, tenantCreated: createdTenant };
     }
 
@@ -106,7 +102,7 @@ export class UsersService {
         const { tenantId, email, password, name } = signup;
 
         if (!tenantId) {
-            throw new BadRequestException('tenantId is required to signup a manager.');
+            throw new BadRequestException({ key: 'user.manager_tenant_required' });
         }
 
         const createUserDto: CreateUserDto = { email, password, name, role: 'manager' } as any;
@@ -117,7 +113,6 @@ export class UsersService {
         const { tenantId, email } = payload;
         const user = await this.findByEmail(tenantId, email);
 
-        // Always return success to avoid leaking which emails exist
         if (!user) {
             return { ok: true };
         }
@@ -125,18 +120,15 @@ export class UsersService {
         const token = uuidv4();
         const expiry = Date.now() + 1000 * 60 * 60; // 1 hour
 
-        // Update user doc with token and expiry
         const doc = await this.db.get(user._id);
         doc.resetToken = token;
         doc.resetTokenExpiry = expiry;
         doc.updatedAt = new Date().toISOString();
         await this.db.insert(doc);
 
-        // Send email (best-effort)
         try {
             if (this.mailService) await this.mailService.sendResetPasswordEmail(email, tenantId, token, user.locale || 'en', user.name);
         } catch (err) {
-            // Log internally and continue; do not reveal email sending failures to the caller
             this.logger.error('Failed to send reset password email', err as any);
         }
 
@@ -146,16 +138,15 @@ export class UsersService {
     async resetPassword(payload: ResetPasswordDto) {
         const { tenantId, token, newPassword } = payload;
 
-        // Find user by token
         const query = { selector: { type: 'user', resetToken: token } };
         const result = await this.db.partitionedFind(tenantId, query);
         if (!result.docs || result.docs.length === 0) {
-            throw new BadRequestException('Invalid or expired token.');
+            throw new BadRequestException({ key: 'auth.invalid_token' });
         }
 
         const user = result.docs[0];
         if (!user.resetTokenExpiry || user.resetTokenExpiry < Date.now()) {
-            throw new BadRequestException('Invalid or expired token.');
+            throw new BadRequestException({ key: 'auth.invalid_token' });
         }
 
         const saltRounds = 10;

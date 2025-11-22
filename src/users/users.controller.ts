@@ -17,7 +17,7 @@ export class UsersController {
         const { tenantId, role } = req.user;
 
         if (role !== 'owner' && role !== 'manager') {
-            throw new UnauthorizedException('You do not have permission to create users.');
+            throw new UnauthorizedException({ key: 'auth.no_permission' });
         }
 
         return this.usersService.create(tenantId, createUserDto);

@@ -3,16 +3,37 @@
         "subject": "Weka upya nenosiri yako"
     },
     "tenant": {
-        "create_failed": "Imeshindikana kuunda duka. Tafadhali jaribu tena baadaye."
+        "create_failed": "Imeshindikana kuunda duka. Tafadhali jaribu tena baadaye.",
+        "owner_exists": "An owner already exists for this tenant.",
+        "missing": "Tenant information is required."
     },
     "mail": {
         "send_failed": "Imeshindikana kutuma barua pepe."
     },
     "auth": {
+        "invalid_credentials": "Invalid credentials.",
+        "no_permission": "You do not have permission to perform this action.",
+        "token_not_found": "Authentication token not found.",
+        "invalid_token_payload": "Invalid token payload.",
+        "token_expired": "Authentication token has expired.",
         "invalid_token": "Token sio sahihi au umeisha muda wake."
+    },
+    "user": {
+        "email_exists": "Mtumiaji mwenye barua pepe hii tayari yupo.",
+        "manager_tenant_required": "tenantId inahitajika kwa usajili wa meneja."
+    },
+    "product": {
+        "sku_exists": "Bidhaa yenye SKU hii tayari ipo.",
+        "not_found": "Bidhaa haikupatikana."
     },
     "database": {
         "env_missing": "Usanidi wa huduma haujakamilika. Tafadhali wasiliana na msaada.",
         "connect_failed": "Huduma haipatikani kwa sasa. Tafadhali jaribu tena baadaye."
+    },
+    "supplier": {
+        "exists": "Muuzaji mwenye nambari ya simu au barua pepe sawa tayari ipo.",
+        "create_failed": "Imeshindikana kuunda muuzaji. Tafadhali jaribu tena baadaye.",
+        "check_failed": "Imeshindikana kuthibitisha kuwa muuzaji hajatokana na mwingine. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindikana kupata orodha ya wauzaji. Tafadhali jaribu tena baadaye."
     }
 }

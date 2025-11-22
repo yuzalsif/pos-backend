@@ -12,8 +12,8 @@ export class ProductsController {
     create(@Body() createProductDto: CreateProductDto, @Req() req) {
         const { tenantId, userId, name, role } = req.user;
 
-        if (role !== 'manager' && role !== 'owner') {
-            throw new UnauthorizedException('You do not have permission to create products.');
+        if (role !== 'owner' && role !== 'manager') {
+            throw new UnauthorizedException({ key: 'auth.no_permission' });
         }
 
         return this.productsService.create(tenantId, userId, name, createProductDto);
