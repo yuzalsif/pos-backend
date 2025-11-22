@@ -7,12 +7,14 @@ describe('SuppliersService (unit)', () => {
         partitionedFind: jest.fn(),
         insert: jest.fn(),
     };
+    const mockLogs: any = { record: jest.fn() };
 
     beforeEach(() => {
         mockDb.partitionedFind.mockReset();
         mockDb.insert.mockReset();
+        mockLogs.record.mockReset();
 
-        suppliersService = new SuppliersService(mockDb as any);
+        suppliersService = new SuppliersService(mockDb as any, mockLogs as any);
     });
 
     it('create should throw BadRequestException when tenantId missing', async () => {
@@ -28,13 +30,23 @@ describe('SuppliersService (unit)', () => {
     it('create should insert supplier and return result', async () => {
         mockDb.partitionedFind.mockResolvedValue({ docs: [] });
         mockDb.insert.mockResolvedValue({ ok: true, id: 'tenant1:supplier:abc', rev: '1-xxx' });
-
         const res = await suppliersService.create('tenant1', { name: 'Sup', phone: '999', email: 's@x.com' } as any, 'creator:1');
 
         expect(mockDb.insert).toHaveBeenCalled();
         expect(res.name).toBe('Sup');
         expect(res.phone).toBe('999');
         expect(res.email).toBe('s@x.com');
+
+        // assert logs recorded
+        expect(mockLogs.record).toHaveBeenCalledTimes(1);
+        expect(mockLogs.record).toHaveBeenCalledWith(
+            'tenant1',
+            { userId: 'creator:1' },
+            'supplier.create',
+            'supplier',
+            expect.stringContaining('tenant1:supplier:'),
+            { name: 'Sup', phone: '999', email: 's@x.com' },
+        );
     });
 
     it('findAll should return supplier docs list', async () => {
