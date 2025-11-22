@@ -71,6 +71,14 @@ export class CreateProductDto {
     @Min(0)
     discountAmount?: number;
 
+    @IsOptional()
+    @IsBoolean()
+    purchase?: boolean; // if true, intention to register a purchase when creating product
+
+    @IsOptional()
+    @IsString()
+    supplierId?: string; // optional supplier reference if registering a purchase
+
     @IsArray()
     @ArrayMinSize(1)
     @ValidateNested({ each: true })

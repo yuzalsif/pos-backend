@@ -34,7 +34,8 @@
         "exists": "A supplier with the same phone or email already exists.",
         "create_failed": "Failed to create supplier. Please try again later.",
         "check_failed": "Failed to validate supplier uniqueness. Please try again later.",
-        "list_failed": "Failed to list suppliers. Please try again later."
+        "list_failed": "Failed to list suppliers. Please try again later.",
+        "not_found": "Supplier not found."
     },
     "uom": {
         "exists": "A unit of measure with this code already exists.",
