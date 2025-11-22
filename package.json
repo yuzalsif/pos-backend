@@ -35,6 +35,9 @@
     "rxjs": "^7.8.1",
     "uuid": "^8.3.2"
   },
+  "optionalDependencies": {
+    "nodemailer": "^6.10.1"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
