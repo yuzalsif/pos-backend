@@ -32,6 +32,23 @@
         "update_failed": "Ntibyashobotse kuvugurura igicuruzwa. Gerageza nyuma.",
         "uom_not_found": "Uburyo bwo gupima bwavuzwe ntibubonetse."
     },
+    "batch": {
+        "already_exists": "Itsinda rifite iyi nimero rirabaho kuri iyi bicuruzwa.",
+        "not_found": "Itsinda ntiryabonetse.",
+        "create_failed": "Byanze gukora itsinda. Nyamuneka ongera ugerageze.",
+        "list_failed": "Byanze kubona amatsinda. Nyamuneka ongera ugerageze.",
+        "query_failed": "Byanze kubaza amatsinda. Nyamuneka ongera ugerageze."
+    },
+    "inventory_item": {
+        "serial_exists": "Ikintu cy'ububiko gifite iyi nimero ikurikirana kirabaho.",
+        "not_found": "Ikintu cy'ububiko ntikyabonetse.",
+        "not_found_by_serial": "Ikintu cy'ububiko ntikyabonetse kuri iyi nimero ikurikirana.",
+        "create_failed": "Byanze gukora ikintu cy'ububiko. Nyamuneka ongera ugerageze.",
+        "update_failed": "Byanze kuvugurura ikintu cy'ububiko. Nyamuneka ongera ugerageze.",
+        "list_failed": "Byanze kubona ibintu by'ububiko. Nyamuneka ongera ugerageze.",
+        "query_failed": "Byanze kubaza ibintu by'ububiko. Nyamuneka ongera ugerageze.",
+        "search_failed": "Byanze gushakisha ikintu cy'ububiko. Nyamuneka ongera ugerageze."
+    },
     "database": {
         "env_missing": "Ibyerekeye serivisi ntibirangiye. Nyamuneka hamagara ubufasha.",
         "connect_failed": "Serivisi yabuze ubu. Nyamuneka gerageza nyuma."

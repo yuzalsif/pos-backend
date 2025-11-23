@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Req, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { AuthGuard, type RequestWithUser } from '../auth/auth.guard';
@@ -17,6 +17,22 @@ export class ProductsController {
         const { tenantId, userId, name } = req.user;
 
         return this.productsService.create(tenantId, userId, name, createProductDto);
+    }
+
+    @Get('barcode/:barcode')
+    @RequirePermissions(Permission.PRODUCTS_VIEW)
+    findByBarcode(@Param('barcode') barcode: string, @Req() req: RequestWithUser) {
+        const { tenantId } = req.user;
+
+        return this.productsService.findByBarcode(tenantId, barcode);
+    }
+
+    @Get('sku/:sku')
+    @RequirePermissions(Permission.PRODUCTS_VIEW)
+    findBySku(@Param('sku') sku: string, @Req() req: RequestWithUser) {
+        const { tenantId } = req.user;
+
+        return this.productsService.findBySku(tenantId, sku);
     }
 
     // TODO: Add GET, PATCH, DELETE endpoints

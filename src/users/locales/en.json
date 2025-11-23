@@ -28,9 +28,29 @@
     "product": {
         "sku_exists": "A product with this SKU already exists.",
         "not_found": "Product not found.",
+        "not_found_by_barcode": "Product not found with barcode.",
+        "not_found_by_sku": "Product not found with SKU.",
+        "search_failed": "Failed to search for product. Please try again later.",
         "create_failed": "Failed to create product. Please try again later.",
         "update_failed": "Failed to update product. Please try again later.",
         "uom_not_found": "Referenced unit of measure not found."
+    },
+    "batch": {
+        "already_exists": "A batch with this number already exists for this product.",
+        "not_found": "Batch not found.",
+        "create_failed": "Failed to create batch. Please try again later.",
+        "list_failed": "Failed to list batches. Please try again later.",
+        "query_failed": "Failed to query batches. Please try again later."
+    },
+    "inventory_item": {
+        "serial_exists": "An inventory item with this serial number already exists.",
+        "not_found": "Inventory item not found.",
+        "not_found_by_serial": "Inventory item not found with serial number.",
+        "create_failed": "Failed to create inventory item. Please try again later.",
+        "update_failed": "Failed to update inventory item. Please try again later.",
+        "list_failed": "Failed to list inventory items. Please try again later.",
+        "query_failed": "Failed to query inventory items. Please try again later.",
+        "search_failed": "Failed to search for inventory item. Please try again later."
     },
     "database": {
         "env_missing": "Service configuration is incomplete. Please contact support.",

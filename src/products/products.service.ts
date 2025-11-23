@@ -76,6 +76,11 @@ export class ProductsService {
                 purchase: !!createProductDto.purchase,
                 supplierId: normalizedSupplierId,
                 unitsOfMeasure: denormUnits,
+                // NEW: Inventory tracking fields
+                barcodes: createProductDto.barcodes ?? [],
+                trackingType: createProductDto.trackingType ?? 'none',
+                requiresExpiryDate: createProductDto.requiresExpiryDate ?? false,
+                minimumStockLevel: createProductDto.minimumStockLevel ?? 0,
                 createdAt: now,
                 createdBy: { userId, name: userName },
                 updatedAt: now,
@@ -207,6 +212,47 @@ export class ProductsService {
                 throw new NotFoundException({ key: 'product.not_found', vars: { id } });
             }
             throw error;
+        }
+    }
+
+    async findByBarcode(tenantId: string, barcode: string) {
+        try {
+            const result = await this.db.partitionedFind(tenantId, {
+                selector: {
+                    type: 'product',
+                    barcodes: { $elemMatch: { $eq: barcode } }
+                },
+                limit: 1
+            });
+
+            if (!result.docs || result.docs.length === 0) {
+                throw new NotFoundException({ key: 'product.not_found_by_barcode', vars: { barcode } });
+            }
+
+            return result.docs[0];
+        } catch (error) {
+            if (error instanceof NotFoundException) throw error;
+            this.logger.error('Failed to find product by barcode', error as any);
+            throw new InternalServerErrorException({ key: 'product.search_failed' });
+        }
+    }
+
+    async findBySku(tenantId: string, sku: string) {
+        try {
+            const result = await this.db.partitionedFind(tenantId, {
+                selector: { type: 'product', sku },
+                limit: 1
+            });
+
+            if (!result.docs || result.docs.length === 0) {
+                throw new NotFoundException({ key: 'product.not_found_by_sku', vars: { sku } });
+            }
+
+            return result.docs[0];
+        } catch (error) {
+            if (error instanceof NotFoundException) throw error;
+            this.logger.error('Failed to find product by SKU', error as any);
+            throw new InternalServerErrorException({ key: 'product.search_failed' });
         }
     }
 

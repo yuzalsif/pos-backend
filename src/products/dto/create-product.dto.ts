@@ -9,6 +9,7 @@ import {
     Min,
     ArrayMinSize,
     IsOptional,
+    IsIn,
 } from 'class-validator';
 
 // Price tiers are explicit per UoM for a product. Store values in the tenant's
@@ -84,4 +85,26 @@ export class CreateProductDto {
     @ValidateNested({ each: true })
     @Type(() => ProductUnitDto)
     unitsOfMeasure: ProductUnitDto[];
+
+    // NEW: Barcode support - array to allow multiple barcodes per product
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    barcodes?: string[];
+
+    // NEW: Tracking type determines how inventory is managed
+    @IsOptional()
+    @IsIn(['none', 'batch', 'serial', 'both'])
+    trackingType?: 'none' | 'batch' | 'serial' | 'both';
+
+    // NEW: Does this product require expiry date tracking?
+    @IsOptional()
+    @IsBoolean()
+    requiresExpiryDate?: boolean;
+
+    // NEW: Minimum stock level for low stock alerts
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    minimumStockLevel?: number;
 }

@@ -32,6 +32,23 @@
         "update_failed": "Échec de la mise à jour du produit. Veuillez réessayer plus tard.",
         "uom_not_found": "Unité de mesure introuvable."
     },
+    "batch": {
+        "already_exists": "Un lot avec ce numéro existe déjà pour ce produit.",
+        "not_found": "Lot introuvable.",
+        "create_failed": "Échec de la création du lot. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la récupération des lots. Veuillez réessayer plus tard.",
+        "query_failed": "Échec de la requête des lots. Veuillez réessayer plus tard."
+    },
+    "inventory_item": {
+        "serial_exists": "Un article d'inventaire avec ce numéro de série existe déjà.",
+        "not_found": "Article d'inventaire introuvable.",
+        "not_found_by_serial": "Article d'inventaire introuvable avec ce numéro de série.",
+        "create_failed": "Échec de la création de l'article d'inventaire. Veuillez réessayer plus tard.",
+        "update_failed": "Échec de la mise à jour de l'article d'inventaire. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la récupération des articles d'inventaire. Veuillez réessayer plus tard.",
+        "query_failed": "Échec de la requête des articles d'inventaire. Veuillez réessayer plus tard.",
+        "search_failed": "Échec de la recherche de l'article d'inventaire. Veuillez réessayer plus tard."
+    },
     "database": {
         "env_missing": "La configuration du service est incomplète. Veuillez contacter le support.",
         "connect_failed": "Service temporairement indisponible. Veuillez réessayer plus tard."

@@ -32,6 +32,23 @@
         "update_failed": "Imeshindikana kusasisha bidhaa. Tafadhali jaribu tena baadaye.",
         "uom_not_found": "Kitengo cha kipimo kilichotajwa hakipatikani."
     },
+    "batch": {
+        "already_exists": "Kundi lenye namba hii tayari lipo kwa bidhaa hii.",
+        "not_found": "Kundi halipatikani.",
+        "create_failed": "Imeshindwa kuunda kundi. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindwa kupata makundi. Tafadhali jaribu tena baadaye.",
+        "query_failed": "Imeshindwa kuuliza makundi. Tafadhali jaribu tena baadaye."
+    },
+    "inventory_item": {
+        "serial_exists": "Kitu cha hesabu chenye namba hii ya msururu tayari kipo.",
+        "not_found": "Kitu cha hesabu hakijapatikana.",
+        "not_found_by_serial": "Kitu cha hesabu hakijapatikana kwa namba ya msururu.",
+        "create_failed": "Imeshindwa kuunda kitu cha hesabu. Tafadhali jaribu tena baadaye.",
+        "update_failed": "Imeshindwa kusasisha kitu cha hesabu. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindwa kupata vitu vya hesabu. Tafadhali jaribu tena baadaye.",
+        "query_failed": "Imeshindwa kuuliza vitu vya hesabu. Tafadhali jaribu tena baadaye.",
+        "search_failed": "Imeshindwa kutafuta kitu cha hesabu. Tafadhali jaribu tena baadaye."
+    },
     "database": {
         "env_missing": "Usanidi wa huduma haujakamilika. Tafadhali wasiliana na msaada.",
         "connect_failed": "Huduma haipatikani kwa sasa. Tafadhali jaribu tena baadaye."

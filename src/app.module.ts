@@ -12,6 +12,8 @@ import { UomsModule } from './uoms/uoms.module';
 import { LogsModule } from './logs/logs.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { CategoriesModule } from './categories/categories.module';
+import { BatchesModule } from './batches/batches.module';
+import { InventoryItemsModule } from './inventory-items/inventory-items.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { CategoriesModule } from './categories/categories.module';
     AccountsModule,
     CategoriesModule,
     DatabaseModule,
+    BatchesModule,
+    InventoryItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
