@@ -42,6 +42,15 @@ export enum Permission {
     SUPPLIERS_UPDATE = 'suppliers.update',
     SUPPLIERS_DELETE = 'suppliers.delete',
 
+    // UoM (Unit of Measure) permissions
+    UOMS_CREATE = 'uoms.create',
+    UOMS_VIEW = 'uoms.view',
+    UOMS_UPDATE = 'uoms.update',
+    UOMS_DELETE = 'uoms.delete',
+
+    // Logs permissions
+    LOGS_VIEW = 'logs.view',
+
     // Reports permissions
     REPORTS_VIEW = 'reports.view',
     REPORTS_EXPORT = 'reports.export',
@@ -82,6 +91,13 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.SUPPLIERS_VIEW,
         Permission.SUPPLIERS_UPDATE,
         Permission.SUPPLIERS_DELETE,
+        // UoMs
+        Permission.UOMS_CREATE,
+        Permission.UOMS_VIEW,
+        Permission.UOMS_UPDATE,
+        Permission.UOMS_DELETE,
+        // Logs
+        Permission.LOGS_VIEW,
         // Reports
         Permission.REPORTS_VIEW,
         Permission.REPORTS_EXPORT,
@@ -96,5 +112,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.ACCOUNTS_VIEW,
         // Categories view
         Permission.CATEGORIES_VIEW,
+        // UoMs view
+        Permission.UOMS_VIEW,
+        // Suppliers view
+        Permission.SUPPLIERS_VIEW,
     ],
 };

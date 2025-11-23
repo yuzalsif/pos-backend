@@ -1,20 +1,20 @@
-import { Controller, Post, Body, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { AuthGuard } from '../auth/auth.guard'
+import { AuthGuard, type RequestWithUser } from '../auth/auth.guard';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { RequirePermissions } from '../auth/permissions.decorator';
+import { Permission } from '../auth/permissions.enum';
 
 @Controller('api/v1/products')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionsGuard)
 export class ProductsController {
     constructor(private readonly productsService: ProductsService) { }
 
     @Post()
-    create(@Body() createProductDto: CreateProductDto, @Req() req) {
-        const { tenantId, userId, name, role } = req.user;
-
-        if (role !== 'owner' && role !== 'manager') {
-            throw new UnauthorizedException({ key: 'auth.no_permission' });
-        }
+    @RequirePermissions(Permission.PRODUCTS_CREATE)
+    create(@Body() createProductDto: CreateProductDto, @Req() req: RequestWithUser) {
+        const { tenantId, userId, name } = req.user;
 
         return this.productsService.create(tenantId, userId, name, createProductDto);
     }

@@ -1,13 +1,17 @@
 import { Controller, Get, Param, Query, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { LogsService } from './logs.service';
 import { AuthGuard, type RequestWithUser } from '../auth/auth.guard';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { RequirePermissions } from '../auth/permissions.decorator';
+import { Permission } from '../auth/permissions.enum';
 
 @Controller('api/v1/:tenantId/logs')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionsGuard)
 export class LogsController {
     constructor(private readonly logsService: LogsService) { }
 
     @Get()
+    @RequirePermissions(Permission.LOGS_VIEW)
     async list(
         @Param('tenantId') tenantId: string,
         @Query('action') action: string,
@@ -17,13 +21,8 @@ export class LogsController {
         @Query('skip') skip: string,
         @Req() req: RequestWithUser,
     ) {
-        const { tenantId: userTenant, role } = req.user;
+        const { tenantId: userTenant } = req.user;
         if (userTenant !== tenantId) {
-            throw new UnauthorizedException({ key: 'auth.no_permission' });
-        }
-
-        // Allow owners and managers to view logs
-        if (role !== 'owner' && role !== 'manager') {
             throw new UnauthorizedException({ key: 'auth.no_permission' });
         }
 
