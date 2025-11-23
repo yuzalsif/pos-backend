@@ -12,14 +12,21 @@ The system combines **Role-Based Access Control (RBAC)** with **Permission-Based
 ### 1. Permission Enum (`src/auth/permissions.enum.ts`)
 Defines all available permissions in the system:
 - Sales: `sales.create`, `sales.view`, `sales.update`, `sales.delete`
-- Purchases: `purchases.create`, `purchases.view`, etc.
-- Products, Accounts, Categories, Users, Suppliers, Reports
+- Purchases: `purchases.create`, `purchases.view`, `purchases.update`, `purchases.delete`
+- Products: `products.create`, `products.view`, `products.update`, `products.delete`
+- Accounts: `accounts.create`, `accounts.view`, `accounts.deposit`, `accounts.withdraw`, `accounts.transfer`
+- Categories: `categories.create`, `categories.view`, `categories.update`, `categories.delete`
+- Users: `users.create`, `users.view`, `users.update`, `users.delete`
+- Suppliers: `suppliers.create`, `suppliers.view`, `suppliers.update`, `suppliers.delete`
+- UoMs: `uoms.create`, `uoms.view`, `uoms.update`, `uoms.delete`
+- Logs: `logs.view`
+- Reports: `reports.view`, `reports.export`
 
 ### 2. Default Role Permissions
 ```typescript
 Owner → All permissions
-Manager → Most permissions (except user management)
-Attendant → Basic permissions (sales.create, sales.view, products.view)
+Manager → Most permissions (all except user management)
+Attendant → Basic permissions (sales.create, sales.view, products.view, accounts.view, categories.view, uoms.view, suppliers.view)
 ```
 
 ### 3. Permission Guard (`src/auth/permissions.guard.ts`)
@@ -109,20 +116,52 @@ When a user logs in, the JWT token includes their permissions:
 
 | Permission | Owner | Manager | Attendant (Default) |
 |------------|-------|---------|---------------------|
+| **Sales** |
 | `sales.create` | ✅ | ✅ | ✅ |
 | `sales.view` | ✅ | ✅ | ✅ |
 | `sales.update` | ✅ | ✅ | ❌ |
 | `sales.delete` | ✅ | ✅ | ❌ |
+| **Purchases** |
 | `purchases.create` | ✅ | ✅ | ❌ |
 | `purchases.view` | ✅ | ✅ | ❌ |
+| `purchases.update` | ✅ | ✅ | ❌ |
+| `purchases.delete` | ✅ | ✅ | ❌ |
+| **Products** |
 | `products.create` | ✅ | ✅ | ❌ |
 | `products.view` | ✅ | ✅ | ✅ |
+| `products.update` | ✅ | ✅ | ❌ |
+| `products.delete` | ✅ | ✅ | ❌ |
+| **Accounts** |
 | `accounts.create` | ✅ | ✅ | ❌ |
 | `accounts.view` | ✅ | ✅ | ✅ |
 | `accounts.deposit` | ✅ | ✅ | ❌ |
 | `accounts.withdraw` | ✅ | ✅ | ❌ |
+| `accounts.transfer` | ✅ | ✅ | ❌ |
+| **Categories** |
+| `categories.create` | ✅ | ✅ | ❌ |
+| `categories.view` | ✅ | ✅ | ✅ |
+| `categories.update` | ✅ | ✅ | ❌ |
+| `categories.delete` | ✅ | ✅ | ❌ |
+| **Users** |
 | `users.create` | ✅ | ❌ | ❌ |
+| `users.view` | ✅ | ❌ | ❌ |
+| `users.update` | ✅ | ❌ | ❌ |
+| `users.delete` | ✅ | ❌ | ❌ |
+| **Suppliers** |
+| `suppliers.create` | ✅ | ✅ | ❌ |
+| `suppliers.view` | ✅ | ✅ | ✅ |
+| `suppliers.update` | ✅ | ✅ | ❌ |
+| `suppliers.delete` | ✅ | ✅ | ❌ |
+| **UoMs** |
+| `uoms.create` | ✅ | ✅ | ❌ |
+| `uoms.view` | ✅ | ✅ | ✅ |
+| `uoms.update` | ✅ | ✅ | ❌ |
+| `uoms.delete` | ✅ | ✅ | ❌ |
+| **Logs** |
+| `logs.view` | ✅ | ✅ | ❌ |
+| **Reports** |
 | `reports.view` | ✅ | ✅ | ❌ |
+| `reports.export` | ✅ | ✅ | ❌ |
 
 ## Use Cases
 

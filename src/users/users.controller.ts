@@ -1,11 +1,11 @@
-import { Controller, Post, Patch, Param, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Patch, Get, Param, Body, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard, type RequestWithUser } from '../auth/auth.guard';
 import { PermissionsGuard } from '../auth/permissions.guard';
 import { RequirePermissions } from '../auth/permissions.decorator';
-import { Permission } from '../auth/permissions.enum';
+import { Permission, DEFAULT_ROLE_PERMISSIONS } from '../auth/permissions.enum';
 import { SignupDto } from './dto/signup.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -32,6 +32,21 @@ export class UsersController {
         const { tenantId, userId: actorId, name } = req.user;
 
         return this.usersService.update(tenantId, userId, updateUserDto, { userId: actorId, name });
+    }
+
+    // Get available permissions - for UI permission selection
+    @Get('permissions')
+    @RequirePermissions(Permission.USERS_CREATE, Permission.USERS_UPDATE)
+    getAvailablePermissions() {
+        const allPermissions = Object.values(Permission).map(permission => ({
+            value: permission,
+            label: permission.replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+        }));
+
+        return {
+            allPermissions,
+            defaultRolePermissions: DEFAULT_ROLE_PERMISSIONS,
+        };
     }
 
     // Public signup for owner - only allowed if tenant has no owner yet
