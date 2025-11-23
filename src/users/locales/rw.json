@@ -58,12 +58,21 @@
             "parent_type_mismatch": "Ubwoko bw'icyiciro gito bugomba guhuza n'ubwoko bw'icyiciro kikuru."
         },
         "not_found": "Icyiciro nticyabonetse.",
+        "list": {
+            "failed": "Ntibyashobotse kubona ibyiciro. Gerageza nyuma."
+        },
         "update": {
             "duplicate": "Icyiciro gifite izina n'ubwoko bimwe kirabaho."
         },
         "delete": {
             "has_subcategories": "Ntushobora gusiba icyiciro gifite ibyiciro bito.",
             "has_transactions": "Ntushobora gusiba icyiciro gikoreshwa mu mikorere."
+        },
+        "subcategories": {
+            "query_failed": "Ntibyashobotse kubona ibyiciro bito. Gerageza nyuma."
+        },
+        "tree": {
+            "build_failed": "Ntibyashobotse kubaka igiti cy'ibyiciro. Gerageza nyuma."
         }
     },
     "account": {
@@ -72,6 +81,9 @@
             "duplicate": "Konti ifite izina, ubwoko, n'ifaranga kimwe irabaho."
         },
         "not_found": "Konti ntiyabonetse.",
+        "list": {
+            "failed": "Ntibyashobotse kubona konti. Gerageza nyuma."
+        },
         "category_required": "Icyiciro kirakenewe kuri uyu mukono.",
         "category_invalid": "Icyiciro kitemewe. Icyiciro nticyabonetse.",
         "category_type_mismatch": "Ubwoko bw'icyiciro ntabwo buhuza n'ubwoko bw'igikorwa.",
@@ -85,6 +97,9 @@
             "currency_mismatch": "Ntabwo ushobora kwimurira hagati ya konti zifite amafaranga atandukanye.",
             "insufficient_funds": "Amafaranga adahagije yo kwimura.",
             "failed": "Kohereza byanze. Umukono w'igikorwa wasubijwe inyuma."
+        },
+        "transactions": {
+            "query_failed": "Ntibyashobotse kubona imikorere. Gerageza nyuma."
         }
     }
 }

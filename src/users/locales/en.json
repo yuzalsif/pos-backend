@@ -58,12 +58,21 @@
             "parent_type_mismatch": "Subcategory type must match parent category type."
         },
         "not_found": "Category not found.",
+        "list": {
+            "failed": "Failed to retrieve categories. Please try again later."
+        },
         "update": {
             "duplicate": "A category with this name and type already exists."
         },
         "delete": {
             "has_subcategories": "Cannot delete category with subcategories.",
             "has_transactions": "Cannot delete category that is used in transactions."
+        },
+        "subcategories": {
+            "query_failed": "Failed to retrieve subcategories. Please try again later."
+        },
+        "tree": {
+            "build_failed": "Failed to build category tree. Please try again later."
         }
     },
     "account": {
@@ -72,6 +81,9 @@
             "duplicate": "An account with this name, type, and currency already exists."
         },
         "not_found": "Account not found.",
+        "list": {
+            "failed": "Failed to retrieve accounts. Please try again later."
+        },
         "category_required": "Category is required for this operation.",
         "category_invalid": "Invalid category. Category not found.",
         "category_type_mismatch": "Category type does not match operation type.",
@@ -85,6 +97,9 @@
             "currency_mismatch": "Cannot transfer between accounts with different currencies.",
             "insufficient_funds": "Insufficient funds for transfer.",
             "failed": "Transfer failed. Transaction has been rolled back."
+        },
+        "transactions": {
+            "query_failed": "Failed to retrieve transactions. Please try again later."
         }
     }
 }

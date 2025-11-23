@@ -343,21 +343,77 @@ describe('AccountsService (unit)', () => {
             { _id: 'tenant1:transaction:2', accountId: 'tenant1:account:abc', type: 'withdraw', amount: 2000 },
         ];
         mockDb.partitionedFind.mockResolvedValue({ docs: transactions });
-        const res = await accountsService.getTransactions('tenant1', 'abc');
+        const res = await accountsService.getTransactions('tenant1', { accountId: 'abc' });
         expect(res).toHaveLength(2);
         expect(res[0].type).toBe('deposit');
         expect(res[1].type).toBe('withdraw');
     });
 
-    it('should retrieve all transactions when no account specified', async () => {
+    it('should retrieve all transactions when no filters specified', async () => {
         const transactions = [
             { _id: 'tenant1:transaction:1', accountId: 'tenant1:account:abc', type: 'deposit', amount: 5000 },
             { _id: 'tenant1:transaction:2', accountId: 'tenant1:account:def', type: 'withdraw', amount: 2000 },
             { _id: 'tenant1:account:xyz', name: 'Other' }, // Should be filtered out
         ];
         mockDb.partitionedFind.mockResolvedValue({ docs: transactions });
-        const res = await accountsService.getTransactions('tenant1');
+        const res = await accountsService.getTransactions('tenant1', {});
         expect(res).toHaveLength(2);
         expect(res.every((t: any) => t._id.includes(':transaction:'))).toBe(true);
+    });
+
+    it('should filter transactions by category', async () => {
+        const transactions = [
+            { _id: 'tenant1:transaction:1', categoryId: 'tenant1:category:cat1', type: 'deposit', amount: 5000 },
+        ];
+        mockDb.partitionedFind.mockResolvedValue({ docs: transactions });
+        const res = await accountsService.getTransactions('tenant1', { categoryId: 'cat1' });
+        expect(res).toHaveLength(1);
+        expect(res[0].categoryId).toBe('tenant1:category:cat1');
+    });
+
+    it('should filter transactions by type', async () => {
+        const transactions = [
+            { _id: 'tenant1:transaction:1', type: 'deposit', amount: 5000 },
+        ];
+        mockDb.partitionedFind.mockResolvedValue({ docs: transactions });
+        const res = await accountsService.getTransactions('tenant1', { type: 'deposit' });
+        expect(res).toHaveLength(1);
+        expect(res[0].type).toBe('deposit');
+    });
+
+    it('should filter transactions by date range', async () => {
+        const transactions = [
+            { _id: 'tenant1:transaction:1', timestamp: '2025-06-15T10:00:00Z', amount: 5000 },
+        ];
+        mockDb.partitionedFind.mockResolvedValue({ docs: transactions });
+        const res = await accountsService.getTransactions('tenant1', {
+            startDate: '2025-01-01T00:00:00Z',
+            endDate: '2025-12-31T23:59:59Z',
+        });
+        expect(res).toHaveLength(1);
+    });
+
+    it('should filter transactions by multiple criteria', async () => {
+        const transactions = [
+            {
+                _id: 'tenant1:transaction:1',
+                accountId: 'tenant1:account:abc',
+                categoryId: 'tenant1:category:cat1',
+                type: 'deposit',
+                timestamp: '2025-06-15T10:00:00Z',
+                amount: 5000,
+            },
+        ];
+        mockDb.partitionedFind.mockResolvedValue({ docs: transactions });
+        const res = await accountsService.getTransactions('tenant1', {
+            accountId: 'abc',
+            categoryId: 'cat1',
+            type: 'deposit',
+            startDate: '2025-01-01T00:00:00Z',
+            endDate: '2025-12-31T23:59:59Z',
+        });
+        expect(res).toHaveLength(1);
+        expect(res[0].type).toBe('deposit');
+        expect(res[0].categoryId).toBe('tenant1:category:cat1');
     });
 });

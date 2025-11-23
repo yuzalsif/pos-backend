@@ -58,12 +58,21 @@
             "parent_type_mismatch": "Aina ya jamii ndogo lazima ilingane na aina ya jamii kuu."
         },
         "not_found": "Jamii haikupatikana.",
+        "list": {
+            "failed": "Imeshindikana kupata jamii. Tafadhali jaribu tena baadaye."
+        },
         "update": {
             "duplicate": "Jamii yenye jina na aina hii tayari ipo."
         },
         "delete": {
             "has_subcategories": "Huwezi kufuta jamii yenye jamii ndogo.",
             "has_transactions": "Huwezi kufuta jamii inayotumika katika miamala."
+        },
+        "subcategories": {
+            "query_failed": "Imeshindikana kupata jamii ndogo. Tafadhali jaribu tena baadaye."
+        },
+        "tree": {
+            "build_failed": "Imeshindikana kujenga mti wa jamii. Tafadhali jaribu tena baadaye."
         }
     },
     "account": {
@@ -72,6 +81,9 @@
             "duplicate": "Akaunti yenye jina, aina, na sarafu hiyo tayari ipo."
         },
         "not_found": "Akaunti haikupatikana.",
+        "list": {
+            "failed": "Imeshindikana kupata akaunti. Tafadhali jaribu tena baadaye."
+        },
         "category_required": "Jamii inahitajika kwa ajili ya shughuli hii.",
         "category_invalid": "Jamii sio sahihi. Jamii haikupatikana.",
         "category_type_mismatch": "Aina ya jamii hailingani na aina ya shughuli.",
@@ -85,6 +97,9 @@
             "currency_mismatch": "Huwezi kuhamisha kati ya akaunti zenye sarafu tofauti.",
             "insufficient_funds": "Hana pesa za kutosha kwa ajili ya uhamisho.",
             "failed": "Uhamisho umefaula. Muamala umezirudi nyuma."
+        },
+        "transactions": {
+            "query_failed": "Imeshindikana kupata miamala. Tafadhali jaribu tena baadaye."
         }
     }
 }

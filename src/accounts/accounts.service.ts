@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException, InternalServerErrorException, Inject } from '@nestjs/common';
 import type nano from 'nano';
 import { DATABASE_CONNECTION } from '../database/database.constants';
 import { LogsService } from '../logs/logs.service';
@@ -43,8 +43,12 @@ export class AccountsService {
     }
 
     async list(tenantId: string) {
-        const res = await this.db.partitionedFind(tenantId, { selector: {} });
-        return res.docs;
+        try {
+            const res = await this.db.partitionedFind(tenantId, { selector: {} });
+            return res.docs;
+        } catch (err) {
+            throw new InternalServerErrorException('account.list.failed');
+        }
     }
 
     async deposit(tenantId: string, actorId: string, accountId: string, dto: DepositDto) {
@@ -241,12 +245,52 @@ export class AccountsService {
         }
     }
 
-    async getTransactions(tenantId: string, accountId?: string) {
-        const selector: any = accountId ? { accountId: `${tenantId}:account:${accountId}` } : {};
-        const res = await this.db.partitionedFind(tenantId, {
-            selector,
-            sort: [{ timestamp: 'desc' }]
-        });
-        return res.docs.filter((doc: any) => doc._id.includes(':transaction:'));
+    async getTransactions(tenantId: string, filters?: {
+        accountId?: string;
+        categoryId?: string;
+        type?: 'deposit' | 'withdraw' | 'transfer_in' | 'transfer_out';
+        startDate?: string;
+        endDate?: string;
+    }) {
+        try {
+            const selector: any = {};
+
+            // Filter by account
+            if (filters?.accountId) {
+                selector.accountId = `${tenantId}:account:${filters.accountId}`;
+            }
+
+            // Filter by category
+            if (filters?.categoryId) {
+                const categoryFullId = filters.categoryId.includes(':')
+                    ? filters.categoryId
+                    : `${tenantId}:category:${filters.categoryId}`;
+                selector.categoryId = categoryFullId;
+            }
+
+            // Filter by transaction type
+            if (filters?.type) {
+                selector.type = filters.type;
+            }
+
+            // Filter by date range
+            if (filters?.startDate || filters?.endDate) {
+                selector.timestamp = {};
+                if (filters.startDate) {
+                    selector.timestamp.$gte = filters.startDate;
+                }
+                if (filters.endDate) {
+                    selector.timestamp.$lte = filters.endDate;
+                }
+            }
+
+            const res = await this.db.partitionedFind(tenantId, {
+                selector,
+                sort: [{ timestamp: 'desc' }]
+            });
+            return res.docs.filter((doc: any) => doc._id.includes(':transaction:'));
+        } catch (err) {
+            throw new InternalServerErrorException('account.transactions.query_failed');
+        }
     }
 }

@@ -135,18 +135,60 @@ describe('AccountsController', () => {
             const req = { user: { tenantId: 'tenant1' } };
             mockAccountsService.getTransactions.mockResolvedValue([]);
 
-            await controller.getTransactions('abc', req as any);
+            await controller.getTransactions('abc', undefined, undefined, undefined, undefined, req as any);
 
-            expect(service.getTransactions).toHaveBeenCalledWith('tenant1', 'abc');
+            expect(service.getTransactions).toHaveBeenCalledWith('tenant1', {
+                accountId: 'abc',
+                categoryId: undefined,
+                type: undefined,
+                startDate: undefined,
+                endDate: undefined,
+            });
+        });
+
+        it('should get transactions with filters', async () => {
+            const req = { user: { tenantId: 'tenant1' } };
+            mockAccountsService.getTransactions.mockResolvedValue([]);
+
+            await controller.getTransactions('abc', 'cat1', 'deposit', '2025-01-01', '2025-12-31', req as any);
+
+            expect(service.getTransactions).toHaveBeenCalledWith('tenant1', {
+                accountId: 'abc',
+                categoryId: 'cat1',
+                type: 'deposit',
+                startDate: '2025-01-01',
+                endDate: '2025-12-31',
+            });
         });
 
         it('should get all transactions', async () => {
             const req = { user: { tenantId: 'tenant1' } };
             mockAccountsService.getTransactions.mockResolvedValue([]);
 
-            await controller.getAllTransactions(req as any);
+            await controller.getAllTransactions(undefined, undefined, undefined, undefined, undefined, req as any);
 
-            expect(service.getTransactions).toHaveBeenCalledWith('tenant1');
+            expect(service.getTransactions).toHaveBeenCalledWith('tenant1', {
+                accountId: undefined,
+                categoryId: undefined,
+                type: undefined,
+                startDate: undefined,
+                endDate: undefined,
+            });
+        });
+
+        it('should get all transactions with category filter', async () => {
+            const req = { user: { tenantId: 'tenant1' } };
+            mockAccountsService.getTransactions.mockResolvedValue([]);
+
+            await controller.getAllTransactions(undefined, 'cat2', undefined, undefined, undefined, req as any);
+
+            expect(service.getTransactions).toHaveBeenCalledWith('tenant1', {
+                accountId: undefined,
+                categoryId: 'cat2',
+                type: undefined,
+                startDate: undefined,
+                endDate: undefined,
+            });
         });
     });
 });

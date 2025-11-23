@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException, InternalServerErrorException, Inject } from '@nestjs/common';
 import type nano from 'nano';
 import { DATABASE_CONNECTION } from '../database/database.constants';
 import { LogsService } from '../logs/logs.service';
@@ -55,9 +55,13 @@ export class CategoriesService {
     }
 
     async list(tenantId: string, type?: 'income' | 'expense') {
-        const selector: any = type ? { type } : {};
-        const res = await this.db.partitionedFind(tenantId, { selector });
-        return res.docs.filter((doc: any) => doc._id.includes(':category:'));
+        try {
+            const selector: any = type ? { type } : {};
+            const res = await this.db.partitionedFind(tenantId, { selector });
+            return res.docs.filter((doc: any) => doc._id.includes(':category:'));
+        } catch (err) {
+            throw new InternalServerErrorException('category.list.failed');
+        }
     }
 
     async update(tenantId: string, actorId: string, categoryId: string, dto: UpdateCategoryDto) {
@@ -112,35 +116,44 @@ export class CategoriesService {
     }
 
     async getSubcategories(tenantId: string, categoryId: string) {
-        const category = await this.get(tenantId, categoryId);
-        const res = await this.db.partitionedFind(tenantId, {
-            selector: { parentCategoryId: category._id }
-        });
-        return res.docs;
+        try {
+            const category = await this.get(tenantId, categoryId);
+            const res = await this.db.partitionedFind(tenantId, {
+                selector: { parentCategoryId: category._id }
+            });
+            return res.docs;
+        } catch (err) {
+            if (err instanceof NotFoundException) throw err;
+            throw new InternalServerErrorException('category.subcategories.query_failed');
+        }
     }
 
     async getCategoryTree(tenantId: string, type?: 'income' | 'expense') {
-        const categories = await this.list(tenantId, type);
-        const categoryMap = new Map();
-        const roots: any[] = [];
+        try {
+            const categories = await this.list(tenantId, type);
+            const categoryMap = new Map();
+            const roots: any[] = [];
 
-        // First pass: create map of all categories
-        categories.forEach((cat: any) => {
-            categoryMap.set(cat._id, { ...cat, children: [] });
-        });
+            // First pass: create map of all categories
+            categories.forEach((cat: any) => {
+                categoryMap.set(cat._id, { ...cat, children: [] });
+            });
 
-        // Second pass: build tree structure
-        categories.forEach((cat: any) => {
-            if (cat.parentCategoryId) {
-                const parent = categoryMap.get(cat.parentCategoryId);
-                if (parent) {
-                    parent.children.push(categoryMap.get(cat._id));
+            // Second pass: build tree structure
+            categories.forEach((cat: any) => {
+                if (cat.parentCategoryId) {
+                    const parent = categoryMap.get(cat.parentCategoryId);
+                    if (parent) {
+                        parent.children.push(categoryMap.get(cat._id));
+                    }
+                } else {
+                    roots.push(categoryMap.get(cat._id));
                 }
-            } else {
-                roots.push(categoryMap.get(cat._id));
-            }
-        });
+            });
 
-        return roots;
+            return roots;
+        } catch (err) {
+            throw new InternalServerErrorException('category.tree.build_failed');
+        }
     }
 }

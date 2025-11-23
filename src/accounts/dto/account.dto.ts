@@ -55,3 +55,11 @@ export class TransferDto {
     @IsNotEmpty()
     categoryId: string;
 }
+
+export interface TransactionFilters {
+    accountId?: string;
+    categoryId?: string;
+    type?: 'deposit' | 'withdraw' | 'transfer_in' | 'transfer_out';
+    startDate?: string;
+    endDate?: string;
+}

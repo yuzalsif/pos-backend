@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Query, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto, DepositDto, WithdrawDto, TransferDto } from './dto/account.dto';
 import { AuthGuard, type RequestWithUser } from '../auth/auth.guard';
@@ -73,14 +73,40 @@ export class AccountsController {
     }
 
     @Get(':id/transactions')
-    getTransactions(@Param('id') id: string, @Req() req: RequestWithUser) {
+    getTransactions(
+        @Param('id') id: string,
+        @Query('categoryId') categoryId: string | undefined,
+        @Query('type') type: 'deposit' | 'withdraw' | 'transfer_in' | 'transfer_out' | undefined,
+        @Query('startDate') startDate: string | undefined,
+        @Query('endDate') endDate: string | undefined,
+        @Req() req: RequestWithUser
+    ) {
         const { tenantId } = req.user;
-        return this.accountsService.getTransactions(tenantId, id);
+        return this.accountsService.getTransactions(tenantId, {
+            accountId: id,
+            categoryId,
+            type,
+            startDate,
+            endDate,
+        });
     }
 
     @Get('transactions/all')
-    getAllTransactions(@Req() req: RequestWithUser) {
+    getAllTransactions(
+        @Query('accountId') accountId: string | undefined,
+        @Query('categoryId') categoryId: string | undefined,
+        @Query('type') type: 'deposit' | 'withdraw' | 'transfer_in' | 'transfer_out' | undefined,
+        @Query('startDate') startDate: string | undefined,
+        @Query('endDate') endDate: string | undefined,
+        @Req() req: RequestWithUser
+    ) {
         const { tenantId } = req.user;
-        return this.accountsService.getTransactions(tenantId);
+        return this.accountsService.getTransactions(tenantId, {
+            accountId,
+            categoryId,
+            type,
+            startDate,
+            endDate,
+        });
     }
 }
