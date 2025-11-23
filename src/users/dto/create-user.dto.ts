@@ -12,6 +12,6 @@ export class CreateUserDto {
     @IsNotEmpty()
     name: string;
 
-    @IsIn(['cashier', 'manager', 'owner'])
-    role: 'cashier' | 'manager' | 'owner';
+    @IsIn(['attendant', 'manager', 'owner'])
+    role: 'attendant' | 'manager' | 'owner';
 }

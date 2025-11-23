@@ -12,7 +12,7 @@ export interface UserPayload {
     userId: string;
     tenantId: string;
     name: string;
-    role: 'cashier' | 'manager' | 'owner';
+    role: 'attendant' | 'manager' | 'owner';
 }
 
 export interface RequestWithUser extends Request {
@@ -79,7 +79,7 @@ export class AuthGuard implements CanActivate {
             typeof p.userId === 'string' &&
             typeof p.tenantId === 'string' &&
             typeof p.name === 'string' &&
-            (p.role === 'cashier' || p.role === 'manager' || p.role === 'owner')
+            (p.role === 'attendant' || p.role === 'manager' || p.role === 'owner')
         );
     }
 }

@@ -39,7 +39,7 @@ export class AccountsController {
     ) {
         const { tenantId, userId, role } = req.user;
 
-        if (role !== 'owner' && role !== 'manager' && role !== 'cashier') {
+        if (role !== 'owner' && role !== 'manager' && role !== 'attendant') {
             throw new UnauthorizedException({ key: 'auth.no_permission' });
         }
 
@@ -54,7 +54,7 @@ export class AccountsController {
     ) {
         const { tenantId, userId, role } = req.user;
 
-        if (role !== 'owner' && role !== 'manager' && role !== 'cashier') {
+        if (role !== 'owner' && role !== 'manager' && role !== 'attendant') {
             throw new UnauthorizedException({ key: 'auth.no_permission' });
         }
 

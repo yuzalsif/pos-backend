@@ -68,9 +68,9 @@ describe('CategoriesController', () => {
             expect(service.create).toHaveBeenCalledWith('tenant1', 'user:2', dto);
         });
 
-        it('should deny access for cashier', () => {
+        it('should deny access for attendant', () => {
             const dto = { name: 'Sales', type: 'income' as const };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'cashier' } };
+            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
 
             expect(() => controller.create(dto, req as any)).toThrow(UnauthorizedException);
         });
@@ -167,9 +167,9 @@ describe('CategoriesController', () => {
             expect(service.update).toHaveBeenCalledWith('tenant1', 'user:1', 'abc', dto);
         });
 
-        it('should deny update for cashier', () => {
+        it('should deny update for attendant', () => {
             const dto = { name: 'Updated Sales' };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'cashier' } };
+            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
 
             expect(() => controller.update('abc', dto, req as any)).toThrow(UnauthorizedException);
         });
@@ -185,8 +185,8 @@ describe('CategoriesController', () => {
             expect(service.delete).toHaveBeenCalledWith('tenant1', 'user:2', 'abc');
         });
 
-        it('should deny delete for cashier', () => {
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'cashier' } };
+        it('should deny delete for attendant', () => {
+            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
 
             expect(() => controller.delete('abc', req as any)).toThrow(UnauthorizedException);
         });

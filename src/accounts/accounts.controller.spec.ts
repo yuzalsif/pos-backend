@@ -69,18 +69,18 @@ describe('AccountsController', () => {
             expect(service.create).toHaveBeenCalledWith('tenant1', 'user:2', dto);
         });
 
-        it('should deny access for cashier', () => {
+        it('should deny access for attendant', () => {
             const dto = { name: 'NMB', initialBalance: 5000, type: 'bank', currency: 'TZS' };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'cashier' } };
+            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
 
             expect(() => controller.create(dto, req as any)).toThrow(UnauthorizedException);
         });
     });
 
     describe('deposit', () => {
-        it('should allow deposit for cashier', async () => {
+        it('should allow deposit for attendant', async () => {
             const dto = { amount: 1000, categoryId: 'cat1' };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'cashier' } };
+            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
             mockAccountsService.deposit.mockResolvedValue({ account: {}, transaction: {} });
 
             await controller.deposit('abc', dto, req as any);
@@ -122,9 +122,9 @@ describe('AccountsController', () => {
             expect(service.transfer).toHaveBeenCalledWith('tenant1', 'user:1', dto);
         });
 
-        it('should deny transfer for cashier', () => {
+        it('should deny transfer for attendant', () => {
             const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 1000, categoryId: 'cat3' };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'cashier' } };
+            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
 
             expect(() => controller.transfer(dto, req as any)).toThrow(UnauthorizedException);
         });
