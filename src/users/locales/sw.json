@@ -20,7 +20,10 @@
     },
     "user": {
         "email_exists": "Mtumiaji mwenye barua pepe hii tayari yupo.",
-        "manager_tenant_required": "tenantId inahitajika kwa usajili wa meneja."
+        "manager_tenant_required": "tenantId inahitajika kwa usajili wa meneja.",
+        "not_found": "Mtumiaji hajapatikana.",
+        "get_failed": "Imeshindwa kupata mtumiaji. Tafadhali jaribu tena baadaye.",
+        "update_failed": "Imeshindwa kusasisha mtumiaji. Tafadhali jaribu tena baadaye."
     },
     "product": {
         "sku_exists": "Bidhaa yenye SKU hii tayari ipo.",

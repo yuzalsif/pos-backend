@@ -13,6 +13,7 @@ export interface UserPayload {
     tenantId: string;
     name: string;
     role: 'attendant' | 'manager' | 'owner';
+    permissions?: string[];
 }
 
 export interface RequestWithUser extends Request {

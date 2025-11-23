@@ -4,10 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { DATABASE_CONNECTION } from '../database/database.constants';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { MailService } from './mail.service';
 import { SignupDto } from './dto/signup.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { DEFAULT_ROLE_PERMISSIONS } from '../auth/permissions.enum';
 
 @Injectable()
 export class UsersService {
@@ -20,7 +22,7 @@ export class UsersService {
     private readonly logger = new Logger(UsersService.name);
 
     async create(tenantId: string, createUserDto: CreateUserDto, actor?: { userId?: string; name?: string }) {
-        const { email, password, name, role } = createUserDto;
+        const { email, password, name, role, permissions } = createUserDto;
 
         const existing = await this.findByEmail(tenantId, email);
         if (existing) {
@@ -39,6 +41,7 @@ export class UsersService {
             passwordHash,
             name,
             role,
+            permissions: permissions || DEFAULT_ROLE_PERMISSIONS[role] || [],
             createdAt: now,
             createdBy: actor ? { userId: actor.userId, name: actor.name } : null,
             updatedAt: now,
@@ -70,6 +73,75 @@ export class UsersService {
         }
 
         return result.docs[0] || null;
+    }
+
+    async update(tenantId: string, userId: string, updateUserDto: UpdateUserDto, actor: { userId: string; name: string }) {
+        const { email, password, name, role, permissions } = updateUserDto;
+
+        // Get existing user
+        const userDocId = `${tenantId}:user:${userId}`;
+        let userDoc;
+        try {
+            userDoc = await this.db.get(userDocId);
+        } catch (err: any) {
+            if (err.statusCode === 404) {
+                throw new NotFoundException({ key: 'user.not_found', vars: { userId } });
+            }
+            throw new InternalServerErrorException('user.get_failed');
+        }
+
+        // Check if email is being changed and if it already exists
+        if (email && email !== userDoc.email) {
+            const existing = await this.findByEmail(tenantId, email);
+            if (existing) {
+                throw new ConflictException({ key: 'user.email_exists', vars: { email } });
+            }
+            userDoc.email = email;
+        }
+
+        // Update password if provided
+        if (password) {
+            const saltRounds = 10;
+            userDoc.passwordHash = await bcrypt.hash(password, saltRounds);
+        }
+
+        // Update other fields
+        if (name) userDoc.name = name;
+        if (role) {
+            userDoc.role = role;
+            // If role changes and permissions not explicitly provided, reset to role defaults
+            if (permissions === undefined) {
+                userDoc.permissions = DEFAULT_ROLE_PERMISSIONS[role] || [];
+            }
+        }
+        if (permissions !== undefined) {
+            userDoc.permissions = permissions;
+        }
+
+        userDoc.updatedAt = new Date().toISOString();
+        userDoc.updatedBy = { userId: actor.userId, name: actor.name };
+
+        try {
+            await this.db.insert(userDoc);
+        } catch (err) {
+            this.logger.error('Failed to update user', err as any);
+            throw new InternalServerErrorException('user.update_failed');
+        }
+
+        const { passwordHash: _, ...result } = userDoc;
+
+        // Record audit log (best-effort)
+        try {
+            if (this.logsService) {
+                await this.logsService.record(tenantId, actor, 'user.update', 'user', result._id, {
+                    updatedFields: Object.keys(updateUserDto),
+                });
+            }
+        } catch (e) {
+            this.logger.warn('Failed to record user.update log', e as any);
+        }
+
+        return result;
     }
 
     private async ownerExists(tenantId: string) {

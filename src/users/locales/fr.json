@@ -19,8 +19,11 @@
         "invalid_token": "Jeton invalide ou expiré."
     },
     "user": {
-        "email_exists": "Un utilisateur avec cet e-mail existe déjà.",
-        "manager_tenant_required": "tenantId est requis pour inscrire un manager."
+        "email_exists": "Un utilisateur avec cet email existe déjà.",
+        "manager_tenant_required": "tenantId est requis pour inscrire un gestionnaire.",
+        "not_found": "Utilisateur non trouvé.",
+        "get_failed": "Échec de récupération de l'utilisateur. Veuillez réessayer plus tard.",
+        "update_failed": "Échec de mise à jour de l'utilisateur. Veuillez réessayer plus tard."
     },
     "product": {
         "sku_exists": "Un produit avec ce SKU existe déjà.",

@@ -20,7 +20,10 @@
     },
     "user": {
         "email_exists": "A user with this email already exists.",
-        "manager_tenant_required": "tenantId is required to signup a manager."
+        "manager_tenant_required": "tenantId is required to signup a manager.",
+        "not_found": "User not found.",
+        "get_failed": "Failed to retrieve user. Please try again later.",
+        "update_failed": "Failed to update user. Please try again later."
     },
     "product": {
         "sku_exists": "A product with this SKU already exists.",

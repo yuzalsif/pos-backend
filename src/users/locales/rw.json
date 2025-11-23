@@ -20,7 +20,10 @@
     },
     "user": {
         "email_exists": "Umukoresha ufite iyo imeyili asanzwe ahari.",
-        "manager_tenant_required": "tenantId irakenewe kugirango wiyandikishe nka manager."
+        "manager_tenant_required": "tenantId irakenewe kugirango wiyandikishe nka manager.",
+        "not_found": "Umukoresha ntabonetse.",
+        "get_failed": "Byanze kubona umukoresha. Nyamuneka gerageza nyuma.",
+        "update_failed": "Byanze kuvugurura umukoresha. Nyamuneka gerageza nyuma."
     },
     "product": {
         "sku_exists": "Icyo gicuruzwa gifite SKU kiriho cyamaze kubaho.",

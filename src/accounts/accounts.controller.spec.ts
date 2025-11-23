@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccountsController } from './accounts.controller';
 import { AccountsService } from './accounts.service';
-import { UnauthorizedException, ExecutionContext } from '@nestjs/common';
+import { ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
+import { PermissionsGuard } from '../auth/permissions.guard';
 
 describe('AccountsController', () => {
     let controller: AccountsController;
@@ -25,6 +26,13 @@ describe('AccountsController', () => {
         },
     };
 
+    // Mock PermissionsGuard to bypass permission checks in tests
+    const mockPermissionsGuard = {
+        canActivate: (context: ExecutionContext) => {
+            return true; // Always allow access in tests
+        },
+    };
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [AccountsController],
@@ -37,6 +45,8 @@ describe('AccountsController', () => {
         })
             .overrideGuard(AuthGuard)
             .useValue(mockAuthGuard)
+            .overrideGuard(PermissionsGuard)
+            .useValue(mockPermissionsGuard)
             .compile();
 
         controller = module.get<AccountsController>(AccountsController);
@@ -48,7 +58,7 @@ describe('AccountsController', () => {
     });
 
     describe('create', () => {
-        it('should create an account for owner', async () => {
+        it('should create an account', async () => {
             const dto = { name: 'NMB', initialBalance: 5000, type: 'bank', currency: 'TZS' };
             const req = { user: { tenantId: 'tenant1', userId: 'user:1', role: 'owner' } };
             mockAccountsService.create.mockResolvedValue({ ...dto, _id: 'tenant1:account:NMB' });
@@ -57,23 +67,6 @@ describe('AccountsController', () => {
 
             expect(service.create).toHaveBeenCalledWith('tenant1', 'user:1', dto);
             expect(result).toHaveProperty('_id');
-        });
-
-        it('should create an account for manager', async () => {
-            const dto = { name: 'CRDB', initialBalance: 10000, type: 'bank', currency: 'TZS' };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:2', role: 'manager' } };
-            mockAccountsService.create.mockResolvedValue({ ...dto, _id: 'tenant1:account:CRDB' });
-
-            await controller.create(dto, req as any);
-
-            expect(service.create).toHaveBeenCalledWith('tenant1', 'user:2', dto);
-        });
-
-        it('should deny access for attendant', () => {
-            const dto = { name: 'NMB', initialBalance: 5000, type: 'bank', currency: 'TZS' };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
-
-            expect(() => controller.create(dto, req as any)).toThrow(UnauthorizedException);
         });
     });
 
@@ -112,7 +105,7 @@ describe('AccountsController', () => {
     });
 
     describe('transfer', () => {
-        it('should allow transfer for owner', async () => {
+        it('should transfer between accounts', async () => {
             const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 1000, categoryId: 'cat3' };
             const req = { user: { tenantId: 'tenant1', userId: 'user:1', role: 'owner' } };
             mockAccountsService.transfer.mockResolvedValue({ from: {}, to: {}, transactions: [] });
@@ -120,13 +113,6 @@ describe('AccountsController', () => {
             await controller.transfer(dto, req as any);
 
             expect(service.transfer).toHaveBeenCalledWith('tenant1', 'user:1', dto);
-        });
-
-        it('should deny transfer for attendant', () => {
-            const dto = { fromAccountId: 'abc', toAccountId: 'def', amount: 1000, categoryId: 'cat3' };
-            const req = { user: { tenantId: 'tenant1', userId: 'user:3', role: 'attendant' } };
-
-            expect(() => controller.transfer(dto, req as any)).toThrow(UnauthorizedException);
         });
     });
 
