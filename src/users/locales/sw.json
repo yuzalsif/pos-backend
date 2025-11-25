@@ -49,6 +49,11 @@
         "query_failed": "Imeshindwa kuuliza vitu vya hesabu. Tafadhali jaribu tena baadaye.",
         "search_failed": "Imeshindwa kutafuta kitu cha hesabu. Tafadhali jaribu tena baadaye."
     },
+    "stock": {
+        "adjust_failed": "Imeshindwa kurekebisha hisa. Tafadhali jaribu tena baadaye.",
+        "query_failed": "Imeshindwa kuuliza hisa. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindwa kupata hisa. Tafadhali jaribu tena baadaye."
+    },
     "database": {
         "env_missing": "Usanidi wa huduma haujakamilika. Tafadhali wasiliana na msaada.",
         "connect_failed": "Huduma haipatikani kwa sasa. Tafadhali jaribu tena baadaye."

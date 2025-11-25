@@ -31,7 +31,12 @@ export class StockController {
   @RequirePermissions(Permission.PRODUCTS_UPDATE)
   async adjustStock(@Req() req, @Body() adjustStockDto: AdjustStockDto) {
     const { tenantId, userId, userName } = req.user;
-    return this.stockService.adjustStock(tenantId, userId, userName, adjustStockDto);
+    return this.stockService.adjustStock(
+      tenantId,
+      userId,
+      userName,
+      adjustStockDto,
+    );
   }
 
   @Get('low-stock')

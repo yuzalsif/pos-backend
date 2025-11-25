@@ -49,6 +49,11 @@
         "query_failed": "Byanze kubaza ibintu by'ububiko. Nyamuneka ongera ugerageze.",
         "search_failed": "Byanze gushakisha ikintu cy'ububiko. Nyamuneka ongera ugerageze."
     },
+    "stock": {
+        "adjust_failed": "Byanze guhindura ububiko. Nyamuneka ongera ugerageze.",
+        "query_failed": "Byanze kubaza ububiko. Nyamuneka ongera ugerageze.",
+        "list_failed": "Byanze kubona ububiko. Nyamuneka ongera ugerageze."
+    },
     "database": {
         "env_missing": "Ibyerekeye serivisi ntibirangiye. Nyamuneka hamagara ubufasha.",
         "connect_failed": "Serivisi yabuze ubu. Nyamuneka gerageza nyuma."

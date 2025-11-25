@@ -49,6 +49,11 @@
         "query_failed": "Échec de la requête des articles d'inventaire. Veuillez réessayer plus tard.",
         "search_failed": "Échec de la recherche de l'article d'inventaire. Veuillez réessayer plus tard."
     },
+    "stock": {
+        "adjust_failed": "Échec de l'ajustement du stock. Veuillez réessayer plus tard.",
+        "query_failed": "Échec de la requête du stock. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la récupération du stock. Veuillez réessayer plus tard."
+    },
     "database": {
         "env_missing": "La configuration du service est incomplète. Veuillez contacter le support.",
         "connect_failed": "Service temporairement indisponible. Veuillez réessayer plus tard."

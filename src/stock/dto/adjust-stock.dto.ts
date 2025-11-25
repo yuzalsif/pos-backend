@@ -5,7 +5,9 @@ import {
   Min,
   IsOptional,
   IsIn,
+  IsEnum,
 } from 'class-validator';
+import { StockReferenceType } from '../stock-reference-type.enum';
 
 export class AdjustStockDto {
   @IsString()
@@ -20,6 +22,11 @@ export class AdjustStockDto {
   @IsIn(['in', 'out', 'adjustment'])
   type: 'in' | 'out' | 'adjustment';
 
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  purchaseCost?: number; // Unit cost for this adjustment (required for type='in')
+
   @IsString()
   @IsNotEmpty()
   reason: string;
@@ -28,9 +35,9 @@ export class AdjustStockDto {
   @IsOptional()
   referenceId?: string; // Link to batch, sale, purchase, etc.
 
-  @IsString()
+  @IsEnum(StockReferenceType)
   @IsOptional()
-  referenceType?: string; // 'batch', 'sale', 'purchase', 'damage', 'return'
+  referenceType?: StockReferenceType;
 
   @IsString()
   @IsOptional()

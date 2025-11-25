@@ -4,7 +4,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { DocumentScope } from 'nano';
+import type { DocumentScope } from 'nano';
 import { DATABASE_CONNECTION } from '../database/database.constants';
 import { LogsService } from '../logs/logs.service';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
@@ -45,6 +45,7 @@ export class StockService {
         productId,
         quantity,
         type,
+        purchaseCost,
         reason,
         referenceId,
         referenceType,
@@ -79,6 +80,9 @@ export class StockService {
             quantityOnHand: 0,
             quantityReserved: 0,
             quantityAvailable: 0,
+            averageCost: 0,
+            lastPurchaseCost: 0,
+            totalValue: 0,
             createdAt: new Date().toISOString(),
           };
         } else {
@@ -86,21 +90,61 @@ export class StockService {
         }
       }
 
-      // Adjust quantities based on type
+      // Ensure cost fields exist in existing documents
+      if (!stockDoc.averageCost) stockDoc.averageCost = 0;
+      if (!stockDoc.lastPurchaseCost) stockDoc.lastPurchaseCost = 0;
+      if (!stockDoc.totalValue) stockDoc.totalValue = 0;
+
+      // Adjust quantities and costs based on type
       const now = new Date().toISOString();
+      const oldQuantity = stockDoc.quantityOnHand || 0;
+      const oldTotalValue = stockDoc.totalValue || 0;
+
       if (type === 'in') {
-        stockDoc.quantityOnHand = (stockDoc.quantityOnHand || 0) + quantity;
+        // Stock increase - update quantities and recalculate weighted average cost
+        const newQuantity = oldQuantity + quantity;
+        stockDoc.quantityOnHand = newQuantity;
         stockDoc.quantityAvailable =
           (stockDoc.quantityAvailable || 0) + quantity;
+
+        // Update costs with weighted average
+        if (purchaseCost !== undefined && purchaseCost > 0) {
+          const newTotalValue = oldTotalValue + quantity * purchaseCost;
+          stockDoc.averageCost =
+            newQuantity > 0 ? newTotalValue / newQuantity : 0;
+          stockDoc.totalValue = newTotalValue;
+          stockDoc.lastPurchaseCost = purchaseCost;
+        }
       } else if (type === 'out') {
-        stockDoc.quantityOnHand = (stockDoc.quantityOnHand || 0) - quantity;
+        // Stock decrease - reduce quantities and total value
+        stockDoc.quantityOnHand = oldQuantity - quantity;
         stockDoc.quantityAvailable =
           (stockDoc.quantityAvailable || 0) - quantity;
+
+        // Reduce total value based on average cost
+        stockDoc.totalValue = Math.max(
+          0,
+          oldTotalValue - quantity * stockDoc.averageCost,
+        );
       } else if (type === 'adjustment') {
-        // For adjustment, set to exact quantity
-        const diff = quantity - (stockDoc.quantityOnHand || 0);
+        // Manual correction - set to exact quantity
+        const diff = quantity - oldQuantity;
         stockDoc.quantityOnHand = quantity;
         stockDoc.quantityAvailable = (stockDoc.quantityAvailable || 0) + diff;
+
+        // Adjust total value proportionally
+        if (quantity > 0 && oldQuantity > 0) {
+          stockDoc.totalValue = (oldTotalValue / oldQuantity) * quantity;
+        } else if (quantity === 0) {
+          stockDoc.totalValue = 0;
+        }
+      }
+
+      // Recalculate average cost based on new total value
+      if (stockDoc.quantityOnHand > 0) {
+        stockDoc.averageCost = stockDoc.totalValue / stockDoc.quantityOnHand;
+      } else {
+        stockDoc.averageCost = stockDoc.lastPurchaseCost || 0;
       }
 
       stockDoc.updatedAt = now;

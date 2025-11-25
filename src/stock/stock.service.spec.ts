@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { LogsService } from '../logs/logs.service';
+import { StockReferenceType } from './stock-reference-type.enum';
 
 describe('StockService', () => {
   let service: StockService;
@@ -74,6 +75,9 @@ describe('StockService', () => {
         quantityOnHand: 50,
         quantityReserved: 5,
         quantityAvailable: 45,
+        averageCost: 10,
+        lastPurchaseCost: 10,
+        totalValue: 500,
         _rev: '1-abc',
       };
 
@@ -85,9 +89,10 @@ describe('StockService', () => {
         productId: 'prod1',
         quantity: 20,
         type: 'in' as const,
+        purchaseCost: 12,
         reason: 'Purchase received',
         referenceId: 'batch1',
-        referenceType: 'batch',
+        referenceType: StockReferenceType.BATCH,
       };
 
       const result = await service.adjustStock(
@@ -99,6 +104,9 @@ describe('StockService', () => {
 
       expect(result.quantityOnHand).toBe(70); // 50 + 20
       expect(result.quantityAvailable).toBe(65); // 45 + 20
+      expect(result.averageCost).toBeCloseTo(10.57, 2); // (500 + 20*12) / 70
+      expect(result.lastPurchaseCost).toBe(12);
+      expect(result.totalValue).toBe(740); // 500 + 240
       expect(mockLogs.record).toHaveBeenCalledWith(
         'tenant1',
         { userId: 'user1', name: 'User' },
@@ -116,6 +124,9 @@ describe('StockService', () => {
         quantityOnHand: 50,
         quantityReserved: 5,
         quantityAvailable: 45,
+        averageCost: 10,
+        lastPurchaseCost: 10,
+        totalValue: 500,
         _rev: '1-abc',
       };
 
@@ -129,7 +140,7 @@ describe('StockService', () => {
         type: 'out' as const,
         reason: 'Sale',
         referenceId: 'sale1',
-        referenceType: 'sale',
+        referenceType: StockReferenceType.SALE,
       };
 
       const result = await service.adjustStock(
@@ -141,6 +152,8 @@ describe('StockService', () => {
 
       expect(result.quantityOnHand).toBe(35); // 50 - 15
       expect(result.quantityAvailable).toBe(30); // 45 - 15
+      expect(result.totalValue).toBe(350); // 500 - (15 * 10)
+      expect(result.averageCost).toBe(10); // 350 / 35
     });
 
     it('should create new stock document if it does not exist', async () => {
@@ -152,6 +165,7 @@ describe('StockService', () => {
         productId: 'prod1',
         quantity: 10,
         type: 'in' as const,
+        purchaseCost: 15,
         reason: 'Initial stock',
       };
 
@@ -165,6 +179,9 @@ describe('StockService', () => {
       expect(result.quantityOnHand).toBe(10);
       expect(result.quantityAvailable).toBe(10);
       expect(result.quantityReserved).toBe(0);
+      expect(result.averageCost).toBe(15);
+      expect(result.lastPurchaseCost).toBe(15);
+      expect(result.totalValue).toBe(150); // 10 * 15
     });
   });
 

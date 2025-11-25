@@ -52,6 +52,11 @@
         "query_failed": "Failed to query inventory items. Please try again later.",
         "search_failed": "Failed to search for inventory item. Please try again later."
     },
+    "stock": {
+        "adjust_failed": "Failed to adjust stock. Please try again later.",
+        "query_failed": "Failed to query stock. Please try again later.",
+        "list_failed": "Failed to list stock. Please try again later."
+    },
     "database": {
         "env_missing": "Service configuration is incomplete. Please contact support.",
         "connect_failed": "Service temporarily unavailable. Please try again later."
