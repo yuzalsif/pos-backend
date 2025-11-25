@@ -52,11 +52,12 @@ export class InventoryItemsService {
                 throw new ConflictException('inventory_item.serial_exists');
             }
 
-            // If batchId provided, verify batch exists
+            // If batchId provided, verify batch exists and get batch info
+            let batch: any = null;
             if (batchId) {
                 const batchDocId = `${tenantId}:batch:${batchId}`;
                 try {
-                    await this.db.get(batchDocId);
+                    batch = await this.db.get(batchDocId);
                 } catch (error) {
                     if (error.statusCode === 404) {
                         throw new NotFoundException('batch.not_found');
@@ -90,17 +91,44 @@ export class InventoryItemsService {
                 updatedBy: { userId, userName },
             };
 
-      const result = await this.db.insert(inventoryItem);
-      inventoryItem['_rev'] = result.rev;
+            const result = await this.db.insert(inventoryItem);
+            inventoryItem['_rev'] = result.rev;
 
-      await this.logsService.record(
-        tenantId,
-        { userId, name: userName },
-        'inventory-item.create',
-        'inventory-item',
-        itemId,
-        { serialNumber, productId, status: inventoryItem.status },
-      );            return inventoryItem;
+            await this.logsService.record(
+                tenantId,
+                { userId, name: userName },
+                'inventory-item.create',
+                'inventory-item',
+                itemId,
+                { serialNumber, productId, status: inventoryItem.status },
+            );
+
+            // Calculate remaining untracked items if batch exists
+            let remainingUntracked: number | null = null;
+            if (batch) {
+                // Count how many inventory items already exist for this batch
+                const countQuery: any = {
+                    selector: {
+                        type: 'inventory-item',
+                        batchId: batchId!,
+                    },
+                    fields: ['_id'],
+                };
+                const itemsResult = await this.db.partitionedFind(tenantId, countQuery);
+                const serializedCount = itemsResult.docs.length;
+                remainingUntracked = batch.quantityAvailable - serializedCount;
+            }
+
+            return {
+                inventoryItem,
+                batch: batch ? {
+                    batchId: batch.batchId,
+                    batchNumber: batch.batchNumber,
+                    quantityReceived: batch.quantityReceived,
+                    quantityAvailable: batch.quantityAvailable,
+                } : null,
+                remainingUntracked,
+            };
         } catch (error) {
             if (
                 error instanceof NotFoundException ||
@@ -212,20 +240,20 @@ export class InventoryItemsService {
                 updatedBy: { userId, userName },
             };
 
-      const result = await this.db.insert(updatedItem);
-      updatedItem['_rev'] = result.rev;
+            const result = await this.db.insert(updatedItem);
+            updatedItem['_rev'] = result.rev;
 
-      await this.logsService.record(
-        tenantId,
-        { userId, name: userName },
-        'inventory-item.update',
-        'inventory-item',
-        itemId,
-        {
-          changes: updateInventoryItemDto,
-          serialNumber: existingItem.serialNumber,
-        },
-      );            return updatedItem;
+            await this.logsService.record(
+                tenantId,
+                { userId, name: userName },
+                'inventory-item.update',
+                'inventory-item',
+                itemId,
+                {
+                    changes: updateInventoryItemDto,
+                    serialNumber: existingItem.serialNumber,
+                },
+            ); return updatedItem;
         } catch (error) {
             if (error.statusCode === 404) {
                 throw new NotFoundException('inventory_item.not_found');

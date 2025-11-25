@@ -76,7 +76,7 @@ export class ProductsService {
                 purchase: !!createProductDto.purchase,
                 supplierId: normalizedSupplierId,
                 unitsOfMeasure: denormUnits,
-                // NEW: Inventory tracking fields
+                // Inventory tracking fields
                 barcodes: createProductDto.barcodes ?? [],
                 trackingType: createProductDto.trackingType ?? 'none',
                 requiresExpiryDate: createProductDto.requiresExpiryDate ?? false,

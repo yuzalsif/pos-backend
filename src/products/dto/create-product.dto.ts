@@ -86,23 +86,23 @@ export class CreateProductDto {
     @Type(() => ProductUnitDto)
     unitsOfMeasure: ProductUnitDto[];
 
-    // NEW: Barcode support - array to allow multiple barcodes per product
+    // Barcode support - array to allow multiple barcodes per product
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
     barcodes?: string[];
 
-    // NEW: Tracking type determines how inventory is managed
+    // Tracking type determines how inventory is managed
     @IsOptional()
     @IsIn(['none', 'batch', 'serial', 'both'])
     trackingType?: 'none' | 'batch' | 'serial' | 'both';
 
-    // NEW: Does this product require expiry date tracking?
+    // Does this product require expiry date tracking?
     @IsOptional()
     @IsBoolean()
     requiresExpiryDate?: boolean;
 
-    // NEW: Minimum stock level for low stock alerts
+    //Minimum stock level for low stock alerts
     @IsOptional()
     @IsNumber()
     @Min(0)

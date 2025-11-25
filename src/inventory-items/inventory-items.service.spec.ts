@@ -68,9 +68,59 @@ describe('InventoryItemsService', () => {
         expect.any(String),
         expect.objectContaining({ serialNumber: 'IMEI:123456789012345', productId: 'prod1' }),
       );
-      expect(result).toHaveProperty('_id');
-      expect(result.serialNumber).toBe('IMEI:123456789012345');
-      expect(result.status).toBe('in_stock');
+      expect(result).toHaveProperty('inventoryItem');
+      expect(result.inventoryItem).toHaveProperty('_id');
+      expect(result.inventoryItem.serialNumber).toBe('IMEI:123456789012345');
+      expect(result.inventoryItem.status).toBe('in_stock');
+      expect(result.batch).toBeNull();
+      expect(result.remainingUntracked).toBeNull();
+    });
+
+    it('should create inventory item with batch and return remaining untracked', async () => {
+      const createDto = {
+        productId: 'prod1',
+        serialNumber: 'IMEI:999888777666',
+        batchId: 'batch1',
+        status: 'in_stock',
+        condition: 'new',
+      };
+
+      // Mock product exists
+      mockDb.get.mockResolvedValueOnce({
+        _id: 'tenant1:product:prod1',
+        sku: 'IP16-256-BLK',
+        trackingType: 'both',
+      });
+
+      // Mock serial doesn't exist (first call)
+      mockDb.partitionedFind.mockResolvedValueOnce({ docs: [] });
+
+      // Mock batch exists (second get call)
+      mockDb.get.mockResolvedValueOnce({
+        _id: 'tenant1:batch:batch1',
+        batchId: 'batch1',
+        batchNumber: 'BATCH-001',
+        quantityReceived: 10,
+        quantityAvailable: 8,
+        productId: 'prod1',
+      });
+
+      // Mock insert
+      mockDb.insert.mockResolvedValue({ id: 'item-id', rev: '1-abc' });
+
+      // Mock count query - 2 items already serialized
+      mockDb.partitionedFind.mockResolvedValueOnce({ docs: [{}, {}] });
+
+      const result = await service.create('tenant1', 'user1', 'User One', createDto as any);
+
+      expect(result.inventoryItem.batchId).toBe('batch1');
+      expect(result.batch).toEqual({
+        batchId: 'batch1',
+        batchNumber: 'BATCH-001',
+        quantityReceived: 10,
+        quantityAvailable: 8,
+      });
+      expect(result.remainingUntracked).toBe(6); // 8 available - 2 already serialized
     });
 
     it('should throw ConflictException if serial number exists', async () => {
