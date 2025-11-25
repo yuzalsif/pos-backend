@@ -10,4 +10,4 @@ import { LogsModule } from '../logs/logs.module';
   controllers: [BatchesController],
   exports: [BatchesService],
 })
-export class BatchesModule { }
+export class BatchesModule {}

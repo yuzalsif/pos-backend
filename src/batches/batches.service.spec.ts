@@ -55,7 +55,12 @@ describe('BatchesService', () => {
       // Mock insert
       mockDb.insert.mockResolvedValue({ id: 'batch-id', rev: '1-abc' });
 
-      const result = await service.create('tenant1', 'user1', 'User One', createDto as any);
+      const result = await service.create(
+        'tenant1',
+        'user1',
+        'User One',
+        createDto as any,
+      );
 
       expect(mockDb.get).toHaveBeenCalledWith('tenant1:product:prod1');
       expect(mockDb.insert).toHaveBeenCalled();
@@ -73,9 +78,13 @@ describe('BatchesService', () => {
       };
 
       mockDb.get.mockResolvedValue({ _id: 'tenant1:product:prod1' });
-      mockDb.partitionedFind.mockResolvedValue({ docs: [{ _id: 'existing-batch' }] });
+      mockDb.partitionedFind.mockResolvedValue({
+        docs: [{ _id: 'existing-batch' }],
+      });
 
-      await expect(service.create('tenant1', 'user1', 'User', createDto as any)).rejects.toThrow(ConflictException);
+      await expect(
+        service.create('tenant1', 'user1', 'User', createDto as any),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should throw NotFoundException if product not found', async () => {
@@ -88,7 +97,9 @@ describe('BatchesService', () => {
 
       mockDb.get.mockRejectedValue({ statusCode: 404 });
 
-      await expect(service.create('tenant1', 'user1', 'User', createDto as any)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.create('tenant1', 'user1', 'User', createDto as any),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

@@ -1,4 +1,12 @@
-import { Injectable, Inject, ConflictException, NotFoundException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import nano, { type DocumentScope } from 'nano';
 import { v4 as uuidv4 } from 'uuid';
 import { DATABASE_CONNECTION } from '../database/database.constants';
@@ -7,254 +15,328 @@ import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
-    private readonly logger = new Logger(ProductsService.name);
-    constructor(
-        @Inject(DATABASE_CONNECTION) private readonly db: DocumentScope<any>,
-        private readonly logsService?: any,
-    ) { }
+  private readonly logger = new Logger(ProductsService.name);
+  constructor(
+    @Inject(DATABASE_CONNECTION) private readonly db: DocumentScope<any>,
+    private readonly logsService?: any,
+  ) {}
 
-    async create(tenantId: string, userId: string, userName: string, createProductDto: CreateProductDto) {
+  async create(
+    tenantId: string,
+    userId: string,
+    userName: string,
+    createProductDto: CreateProductDto,
+  ) {
+    try {
+      // 1. Check for SKU uniqueness within the tenant
+      const existing = await this.db.partitionedFind(tenantId, {
+        selector: { type: 'product', sku: createProductDto.sku },
+      });
+      if (existing.docs.length > 0) {
+        throw new ConflictException({
+          key: 'product.sku_exists',
+          vars: { sku: createProductDto.sku },
+        });
+      }
+
+      // 2. Validate supplier if provided
+      let normalizedSupplierId: string | null = null;
+      if (createProductDto.supplierId) {
+        normalizedSupplierId = createProductDto.supplierId.includes(':')
+          ? createProductDto.supplierId
+          : `${tenantId}:supplier:${createProductDto.supplierId}`;
         try {
-            // 1. Check for SKU uniqueness within the tenant
-            const existing = await this.db.partitionedFind(tenantId, {
-                selector: { type: 'product', sku: createProductDto.sku },
+          await this.db.get(normalizedSupplierId);
+        } catch (err) {
+          throw new BadRequestException({
+            key: 'supplier.not_found',
+            vars: { supplierId: createProductDto.supplierId },
+          });
+        }
+      }
+
+      // 3. Validate and denormalize UoMs
+      const denormUnits = [] as any[];
+      for (const u of createProductDto.unitsOfMeasure) {
+        if (!u.uomId) {
+          throw new BadRequestException({ key: 'product.uom_not_found' });
+        }
+
+        const fullUomId = u.uomId.includes(':')
+          ? u.uomId
+          : `${tenantId}:uom:${u.uomId}`;
+        let uomDoc: any;
+        try {
+          uomDoc = await this.db.get(fullUomId);
+        } catch (err) {
+          throw new BadRequestException({
+            key: 'product.uom_not_found',
+            vars: { uomId: u.uomId },
+          });
+        }
+
+        const factor =
+          typeof u.factor === 'number' ? u.factor : uomDoc.toBaseFactor;
+        if (typeof factor !== 'number' || factor <= 0) {
+          throw new BadRequestException({ key: 'uom.invalid_factor' });
+        }
+
+        denormUnits.push({
+          uomId: fullUomId,
+          uomCode: uomDoc.code,
+          factor,
+          priceTiers: u.priceTiers,
+        });
+      }
+
+      const now = new Date().toISOString();
+      const newProduct = {
+        _id: `${tenantId}:product:${uuidv4()}`,
+        type: 'product',
+        tenantId: tenantId,
+        name: createProductDto.name,
+        description: createProductDto.description ?? null,
+        sku: createProductDto.sku,
+        category: createProductDto.category ?? null,
+        isActive: createProductDto.isActive,
+        discountAmount: createProductDto.discountAmount ?? null,
+        purchase: !!createProductDto.purchase,
+        supplierId: normalizedSupplierId,
+        unitsOfMeasure: denormUnits,
+        // Inventory tracking fields
+        barcodes: createProductDto.barcodes ?? [],
+        trackingType: createProductDto.trackingType ?? 'none',
+        requiresExpiryDate: createProductDto.requiresExpiryDate ?? false,
+        minimumStockLevel: createProductDto.minimumStockLevel ?? 0,
+        createdAt: now,
+        createdBy: { userId, name: userName },
+        updatedAt: now,
+        updatedBy: { userId, name: userName },
+      };
+
+      // 4. Insert into the database
+      const response = await this.db.insert(newProduct);
+      // Note: purchase registration will be implemented later. For now, return product info.
+      const result = { id: response.id, rev: response.rev, ...newProduct };
+
+      // record audit log (best-effort)
+      try {
+        if (this.logsService) {
+          await this.logsService.record(
+            tenantId,
+            { userId, name: userName },
+            'product.create',
+            'product',
+            result.id,
+            { sku: createProductDto.sku },
+          );
+        }
+      } catch (e) {
+        this.logger.warn('Failed to record product.create log', e as any);
+      }
+
+      return result;
+    } catch (error) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      )
+        throw error;
+      this.logger.error('Failed to create product', error as any);
+      throw new InternalServerErrorException({ key: 'product.create_failed' });
+    }
+  }
+
+  async update(
+    tenantId: string,
+    userId: string,
+    userName: string,
+    id: string,
+    updateDto: UpdateProductDto,
+  ) {
+    try {
+      const fullId = `${tenantId}:product:${id}`;
+      let existing: any;
+      try {
+        existing = await this.db.get(fullId);
+      } catch (err) {
+        if ((err as any).statusCode === 404) {
+          throw new NotFoundException({
+            key: 'product.not_found',
+            vars: { id },
+          });
+        }
+        throw err;
+      }
+
+      // If SKU is changing, ensure uniqueness
+      if (updateDto.sku && updateDto.sku !== existing.sku) {
+        const found = await this.db.partitionedFind(tenantId, {
+          selector: { type: 'product', sku: updateDto.sku },
+        });
+        if (found.docs.length > 0) {
+          throw new ConflictException({
+            key: 'product.sku_exists',
+            vars: { sku: updateDto.sku },
+          });
+        }
+      }
+
+      // Validate supplier if provided
+      let normalizedSupplierId: string | null = existing.supplierId ?? null;
+      if (updateDto.supplierId !== undefined) {
+        if (updateDto.supplierId) {
+          normalizedSupplierId = updateDto.supplierId.includes(':')
+            ? updateDto.supplierId
+            : `${tenantId}:supplier:${updateDto.supplierId}`;
+          try {
+            await this.db.get(normalizedSupplierId);
+          } catch (err) {
+            throw new BadRequestException({
+              key: 'supplier.not_found',
+              vars: { supplierId: updateDto.supplierId },
             });
-            if (existing.docs.length > 0) {
-                throw new ConflictException({ key: 'product.sku_exists', vars: { sku: createProductDto.sku } });
-            }
-
-            // 2. Validate supplier if provided
-            let normalizedSupplierId: string | null = null;
-            if (createProductDto.supplierId) {
-                normalizedSupplierId = createProductDto.supplierId.includes(':') ? createProductDto.supplierId : `${tenantId}:supplier:${createProductDto.supplierId}`;
-                try {
-                    await this.db.get(normalizedSupplierId);
-                } catch (err) {
-                    throw new BadRequestException({ key: 'supplier.not_found', vars: { supplierId: createProductDto.supplierId } });
-                }
-            }
-
-            // 3. Validate and denormalize UoMs
-            const denormUnits = [] as any[];
-            for (const u of createProductDto.unitsOfMeasure) {
-                if (!u.uomId) {
-                    throw new BadRequestException({ key: 'product.uom_not_found' });
-                }
-
-                const fullUomId = u.uomId.includes(':') ? u.uomId : `${tenantId}:uom:${u.uomId}`;
-                let uomDoc: any;
-                try {
-                    uomDoc = await this.db.get(fullUomId);
-                } catch (err) {
-                    throw new BadRequestException({ key: 'product.uom_not_found', vars: { uomId: u.uomId } });
-                }
-
-                const factor = typeof u.factor === 'number' ? u.factor : uomDoc.toBaseFactor;
-                if (typeof factor !== 'number' || factor <= 0) {
-                    throw new BadRequestException({ key: 'uom.invalid_factor' });
-                }
-
-                denormUnits.push({
-                    uomId: fullUomId,
-                    uomCode: uomDoc.code,
-                    factor,
-                    priceTiers: u.priceTiers,
-                });
-            }
-
-            const now = new Date().toISOString();
-            const newProduct = {
-                _id: `${tenantId}:product:${uuidv4()}`,
-                type: 'product',
-                tenantId: tenantId,
-                name: createProductDto.name,
-                description: createProductDto.description ?? null,
-                sku: createProductDto.sku,
-                category: createProductDto.category ?? null,
-                isActive: createProductDto.isActive,
-                discountAmount: createProductDto.discountAmount ?? null,
-                purchase: !!createProductDto.purchase,
-                supplierId: normalizedSupplierId,
-                unitsOfMeasure: denormUnits,
-                // Inventory tracking fields
-                barcodes: createProductDto.barcodes ?? [],
-                trackingType: createProductDto.trackingType ?? 'none',
-                requiresExpiryDate: createProductDto.requiresExpiryDate ?? false,
-                minimumStockLevel: createProductDto.minimumStockLevel ?? 0,
-                createdAt: now,
-                createdBy: { userId, name: userName },
-                updatedAt: now,
-                updatedBy: { userId, name: userName },
-            };
-
-            // 4. Insert into the database
-            const response = await this.db.insert(newProduct);
-            // Note: purchase registration will be implemented later. For now, return product info.
-            const result = { id: response.id, rev: response.rev, ...newProduct };
-
-            // record audit log (best-effort)
-            try {
-                if (this.logsService) {
-                    await this.logsService.record(tenantId, { userId, name: userName }, 'product.create', 'product', result.id, { sku: createProductDto.sku });
-                }
-            } catch (e) {
-                this.logger.warn('Failed to record product.create log', e as any);
-            }
-
-            return result;
-        } catch (error) {
-            if (error instanceof ConflictException || error instanceof BadRequestException || error instanceof NotFoundException) throw error;
-            this.logger.error('Failed to create product', error as any);
-            throw new InternalServerErrorException({ key: 'product.create_failed' });
+          }
+        } else {
+          normalizedSupplierId = null;
         }
-    }
+      }
 
-    async update(tenantId: string, userId: string, userName: string, id: string, updateDto: UpdateProductDto) {
-        try {
-            const fullId = `${tenantId}:product:${id}`;
-            let existing: any;
-            try {
-                existing = await this.db.get(fullId);
-            } catch (err) {
-                if ((err as any).statusCode === 404) {
-                    throw new NotFoundException({ key: 'product.not_found', vars: { id } });
-                }
-                throw err;
-            }
-
-            // If SKU is changing, ensure uniqueness
-            if (updateDto.sku && updateDto.sku !== existing.sku) {
-                const found = await this.db.partitionedFind(tenantId, { selector: { type: 'product', sku: updateDto.sku } });
-                if (found.docs.length > 0) {
-                    throw new ConflictException({ key: 'product.sku_exists', vars: { sku: updateDto.sku } });
-                }
-            }
-
-            // Validate supplier if provided
-            let normalizedSupplierId: string | null = existing.supplierId ?? null;
-            if (updateDto.supplierId !== undefined) {
-                if (updateDto.supplierId) {
-                    normalizedSupplierId = updateDto.supplierId.includes(':') ? updateDto.supplierId : `${tenantId}:supplier:${updateDto.supplierId}`;
-                    try {
-                        await this.db.get(normalizedSupplierId);
-                    } catch (err) {
-                        throw new BadRequestException({ key: 'supplier.not_found', vars: { supplierId: updateDto.supplierId } });
-                    }
-                } else {
-                    normalizedSupplierId = null;
-                }
-            }
-
-            // Validate/denormalize units if provided
-            let denormUnits = existing.unitsOfMeasure;
-            if (updateDto.unitsOfMeasure) {
-                denormUnits = [];
-                for (const u of updateDto.unitsOfMeasure) {
-                    if (!u.uomId) {
-                        throw new BadRequestException({ key: 'product.uom_not_found' });
-                    }
-                    const fullUomId = u.uomId.includes(':') ? u.uomId : `${tenantId}:uom:${u.uomId}`;
-                    let uomDoc: any;
-                    try {
-                        uomDoc = await this.db.get(fullUomId);
-                    } catch (err) {
-                        throw new BadRequestException({ key: 'product.uom_not_found', vars: { uomId: u.uomId } });
-                    }
-
-                    const factor = typeof u.factor === 'number' ? u.factor : uomDoc.toBaseFactor;
-                    if (typeof factor !== 'number' || factor <= 0) {
-                        throw new BadRequestException({ key: 'uom.invalid_factor' });
-                    }
-
-                    denormUnits.push({
-                        uomId: fullUomId,
-                        uomCode: uomDoc.code,
-                        factor,
-                        priceTiers: u.priceTiers,
-                    });
-                }
-            }
-
-            const now = new Date().toISOString();
-
-            const updated = {
-                ...existing,
-                ...updateDto,
-                supplierId: normalizedSupplierId,
-                unitsOfMeasure: denormUnits,
-                updatedAt: now,
-                updatedBy: { userId, name: userName },
-            };
-
-            const res = await this.db.insert(updated);
-            // record update log
-            try {
-                if (this.logsService) {
-                    await this.logsService.record(tenantId, { userId, name: userName }, 'product.update', 'product', res.id, { changedFields: Object.keys(updateDto) });
-                }
-            } catch (e) {
-                this.logger.warn('Failed to record product.update log', e as any);
-            }
-            return { id: res.id, rev: res.rev, ...updated };
-        } catch (error) {
-            if (error instanceof ConflictException || error instanceof BadRequestException || error instanceof NotFoundException) throw error;
-            this.logger.error('Failed to update product', error as any);
-            throw new InternalServerErrorException({ key: 'product.update_failed' });
-        }
-    }
-
-    async findOne(tenantId: string, id: string) {
-        try {
-            const doc = await this.db.get(`${tenantId}:product:${id}`);
-            return doc;
-        } catch (error) {
-            if (error.statusCode === 404) {
-                throw new NotFoundException({ key: 'product.not_found', vars: { id } });
-            }
-            throw error;
-        }
-    }
-
-    async findByBarcode(tenantId: string, barcode: string) {
-        try {
-            const result = await this.db.partitionedFind(tenantId, {
-                selector: {
-                    type: 'product',
-                    barcodes: { $elemMatch: { $eq: barcode } }
-                },
-                limit: 1
+      // Validate/denormalize units if provided
+      let denormUnits = existing.unitsOfMeasure;
+      if (updateDto.unitsOfMeasure) {
+        denormUnits = [];
+        for (const u of updateDto.unitsOfMeasure) {
+          if (!u.uomId) {
+            throw new BadRequestException({ key: 'product.uom_not_found' });
+          }
+          const fullUomId = u.uomId.includes(':')
+            ? u.uomId
+            : `${tenantId}:uom:${u.uomId}`;
+          let uomDoc: any;
+          try {
+            uomDoc = await this.db.get(fullUomId);
+          } catch (err) {
+            throw new BadRequestException({
+              key: 'product.uom_not_found',
+              vars: { uomId: u.uomId },
             });
+          }
 
-            if (!result.docs || result.docs.length === 0) {
-                throw new NotFoundException({ key: 'product.not_found_by_barcode', vars: { barcode } });
-            }
+          const factor =
+            typeof u.factor === 'number' ? u.factor : uomDoc.toBaseFactor;
+          if (typeof factor !== 'number' || factor <= 0) {
+            throw new BadRequestException({ key: 'uom.invalid_factor' });
+          }
 
-            return result.docs[0];
-        } catch (error) {
-            if (error instanceof NotFoundException) throw error;
-            this.logger.error('Failed to find product by barcode', error as any);
-            throw new InternalServerErrorException({ key: 'product.search_failed' });
+          denormUnits.push({
+            uomId: fullUomId,
+            uomCode: uomDoc.code,
+            factor,
+            priceTiers: u.priceTiers,
+          });
         }
-    }
+      }
 
-    async findBySku(tenantId: string, sku: string) {
-        try {
-            const result = await this.db.partitionedFind(tenantId, {
-                selector: { type: 'product', sku },
-                limit: 1
-            });
+      const now = new Date().toISOString();
 
-            if (!result.docs || result.docs.length === 0) {
-                throw new NotFoundException({ key: 'product.not_found_by_sku', vars: { sku } });
-            }
+      const updated = {
+        ...existing,
+        ...updateDto,
+        supplierId: normalizedSupplierId,
+        unitsOfMeasure: denormUnits,
+        updatedAt: now,
+        updatedBy: { userId, name: userName },
+      };
 
-            return result.docs[0];
-        } catch (error) {
-            if (error instanceof NotFoundException) throw error;
-            this.logger.error('Failed to find product by SKU', error as any);
-            throw new InternalServerErrorException({ key: 'product.search_failed' });
+      const res = await this.db.insert(updated);
+      // record update log
+      try {
+        if (this.logsService) {
+          await this.logsService.record(
+            tenantId,
+            { userId, name: userName },
+            'product.update',
+            'product',
+            res.id,
+            { changedFields: Object.keys(updateDto) },
+          );
         }
+      } catch (e) {
+        this.logger.warn('Failed to record product.update log', e as any);
+      }
+      return { id: res.id, rev: res.rev, ...updated };
+    } catch (error) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      )
+        throw error;
+      this.logger.error('Failed to update product', error as any);
+      throw new InternalServerErrorException({ key: 'product.update_failed' });
     }
+  }
 
-    // TODO: Add findAll (with pagination), and delete methods
+  async findOne(tenantId: string, id: string) {
+    try {
+      const doc = await this.db.get(`${tenantId}:product:${id}`);
+      return doc;
+    } catch (error) {
+      if (error.statusCode === 404) {
+        throw new NotFoundException({ key: 'product.not_found', vars: { id } });
+      }
+      throw error;
+    }
+  }
+
+  async findByBarcode(tenantId: string, barcode: string) {
+    try {
+      const result = await this.db.partitionedFind(tenantId, {
+        selector: {
+          type: 'product',
+          barcodes: { $elemMatch: { $eq: barcode } },
+        },
+        limit: 1,
+      });
+
+      if (!result.docs || result.docs.length === 0) {
+        throw new NotFoundException({
+          key: 'product.not_found_by_barcode',
+          vars: { barcode },
+        });
+      }
+
+      return result.docs[0];
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      this.logger.error('Failed to find product by barcode', error as any);
+      throw new InternalServerErrorException({ key: 'product.search_failed' });
+    }
+  }
+
+  async findBySku(tenantId: string, sku: string) {
+    try {
+      const result = await this.db.partitionedFind(tenantId, {
+        selector: { type: 'product', sku },
+        limit: 1,
+      });
+
+      if (!result.docs || result.docs.length === 0) {
+        throw new NotFoundException({
+          key: 'product.not_found_by_sku',
+          vars: { sku },
+        });
+      }
+
+      return result.docs[0];
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      this.logger.error('Failed to find product by SKU', error as any);
+      throw new InternalServerErrorException({ key: 'product.search_failed' });
+    }
+  }
+
+  // TODO: Add findAll (with pagination), and delete methods
 }

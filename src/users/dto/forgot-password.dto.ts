@@ -1,10 +1,10 @@
 import { IsEmail, IsString, IsNotEmpty } from 'class-validator';
 
 export class ForgotPasswordDto {
-    @IsString()
-    @IsNotEmpty()
-    tenantId: string;
+  @IsString()
+  @IsNotEmpty()
+  tenantId: string;
 
-    @IsEmail()
-    email: string;
+  @IsEmail()
+  email: string;
 }

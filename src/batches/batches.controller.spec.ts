@@ -57,13 +57,20 @@ describe('BatchesController', () => {
         quantity: 100,
         purchaseCost: 1000,
       };
-      const req = { user: { tenantId: 'tenant1', userId: 'user1', name: 'User One' } };
+      const req = {
+        user: { tenantId: 'tenant1', userId: 'user1', name: 'User One' },
+      };
 
       mockBatchesService.create.mockResolvedValue({ _id: 'batch1', ...dto });
 
       const result = await controller.create(dto as any, req as any);
 
-      expect(service.create).toHaveBeenCalledWith('tenant1', 'user1', 'User One', dto);
+      expect(service.create).toHaveBeenCalledWith(
+        'tenant1',
+        'user1',
+        'User One',
+        dto,
+      );
       expect(result).toHaveProperty('_id');
     });
   });

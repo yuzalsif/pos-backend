@@ -56,7 +56,12 @@ describe('InventoryItemsService', () => {
       // Mock insert
       mockDb.insert.mockResolvedValue({ id: 'item-id', rev: '1-abc' });
 
-      const result = await service.create('tenant1', 'user1', 'User One', createDto as any);
+      const result = await service.create(
+        'tenant1',
+        'user1',
+        'User One',
+        createDto as any,
+      );
 
       expect(mockDb.get).toHaveBeenCalledWith('tenant1:product:prod1');
       expect(mockDb.insert).toHaveBeenCalled();
@@ -66,7 +71,10 @@ describe('InventoryItemsService', () => {
         'inventory-item.create',
         'inventory-item',
         expect.any(String),
-        expect.objectContaining({ serialNumber: 'IMEI:123456789012345', productId: 'prod1' }),
+        expect.objectContaining({
+          serialNumber: 'IMEI:123456789012345',
+          productId: 'prod1',
+        }),
       );
       expect(result).toHaveProperty('inventoryItem');
       expect(result.inventoryItem).toHaveProperty('_id');
@@ -111,7 +119,12 @@ describe('InventoryItemsService', () => {
       // Mock count query - 2 items already serialized
       mockDb.partitionedFind.mockResolvedValueOnce({ docs: [{}, {}] });
 
-      const result = await service.create('tenant1', 'user1', 'User One', createDto as any);
+      const result = await service.create(
+        'tenant1',
+        'user1',
+        'User One',
+        createDto as any,
+      );
 
       expect(result.inventoryItem.batchId).toBe('batch1');
       expect(result.batch).toEqual({
@@ -129,10 +142,17 @@ describe('InventoryItemsService', () => {
         serialNumber: 'IMEI:123456789012345',
       };
 
-      mockDb.get.mockResolvedValue({ _id: 'tenant1:product:prod1', trackingType: 'serial' });
-      mockDb.partitionedFind.mockResolvedValue({ docs: [{ _id: 'existing-item' }] });
+      mockDb.get.mockResolvedValue({
+        _id: 'tenant1:product:prod1',
+        trackingType: 'serial',
+      });
+      mockDb.partitionedFind.mockResolvedValue({
+        docs: [{ _id: 'existing-item' }],
+      });
 
-      await expect(service.create('tenant1', 'user1', 'User', createDto as any)).rejects.toThrow(ConflictException);
+      await expect(
+        service.create('tenant1', 'user1', 'User', createDto as any),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should throw NotFoundException if product not found', async () => {
@@ -143,7 +163,9 @@ describe('InventoryItemsService', () => {
 
       mockDb.get.mockRejectedValue({ statusCode: 404 });
 
-      await expect(service.create('tenant1', 'user1', 'User', createDto as any)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.create('tenant1', 'user1', 'User', createDto as any),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -157,7 +179,10 @@ describe('InventoryItemsService', () => {
 
       mockDb.partitionedFind.mockResolvedValue({ docs: [item] });
 
-      const result = await service.findBySerial('tenant1', 'IMEI:123456789012345');
+      const result = await service.findBySerial(
+        'tenant1',
+        'IMEI:123456789012345',
+      );
 
       expect(result).toEqual(item);
       expect(mockDb.partitionedFind).toHaveBeenCalledWith('tenant1', {
@@ -172,7 +197,9 @@ describe('InventoryItemsService', () => {
     it('should throw NotFoundException if serial not found', async () => {
       mockDb.partitionedFind.mockResolvedValue({ docs: [] });
 
-      await expect(service.findBySerial('tenant1', 'IMEI:999')).rejects.toThrow(NotFoundException);
+      await expect(service.findBySerial('tenant1', 'IMEI:999')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -204,7 +231,13 @@ describe('InventoryItemsService', () => {
       mockDb.insert.mockResolvedValue({ id: 'item1', rev: '2-abc' });
 
       const updateDto = { status: 'sold', saleId: 'sale123' };
-      const result = await service.update('tenant1', 'user1', 'User', 'item1', updateDto as any);
+      const result = await service.update(
+        'tenant1',
+        'user1',
+        'User',
+        'item1',
+        updateDto as any,
+      );
 
       expect(mockDb.insert).toHaveBeenCalled();
       expect(mockLogs.record).toHaveBeenCalledWith(
@@ -225,7 +258,11 @@ describe('InventoryItemsService', () => {
     it('should throw NotFoundException if item not found', async () => {
       mockDb.get.mockRejectedValue({ statusCode: 404 });
 
-      await expect(service.update('tenant1', 'user1', 'User', 'item1', { status: 'sold' } as any)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('tenant1', 'user1', 'User', 'item1', {
+          status: 'sold',
+        } as any),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

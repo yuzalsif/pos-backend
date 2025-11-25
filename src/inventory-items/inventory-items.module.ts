@@ -10,4 +10,4 @@ import { LogsModule } from '../logs/logs.module';
   controllers: [InventoryItemsController],
   exports: [InventoryItemsService],
 })
-export class InventoryItemsModule { }
+export class InventoryItemsModule {}

@@ -23,4 +23,4 @@ import { UsersModule } from '../users/users.module';
   providers: [AuthService, AuthGuard],
   exports: [AuthGuard, AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}

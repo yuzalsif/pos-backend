@@ -11,4 +11,4 @@ import { LogsModule } from '../logs/logs.module';
   controllers: [UsersController],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}
