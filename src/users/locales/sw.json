@@ -33,11 +33,12 @@
         "uom_not_found": "Kitengo cha kipimo kilichotajwa hakipatikani."
     },
     "batch": {
-        "already_exists": "Kundi lenye namba hii tayari lipo kwa bidhaa hii.",
-        "not_found": "Kundi halipatikani.",
+        "already_exists": "Kundi lenye nambari hii tayari lipo kwa bidhaa hii.",
+        "not_found": "Kundi halikupatikana.",
         "create_failed": "Imeshindwa kuunda kundi. Tafadhali jaribu tena baadaye.",
-        "list_failed": "Imeshindwa kupata makundi. Tafadhali jaribu tena baadaye.",
-        "query_failed": "Imeshindwa kuuliza makundi. Tafadhali jaribu tena baadaye."
+        "creation_failed": "Uundaji wa kundi umeshindwa: {{reason}}.",
+        "list_failed": "Imeshindwa kuorodhesha makundi. Tafadhali jaribu tena baadaye.",
+        "query_failed": "Imeshindwa kutafuta makundi. Tafadhali jaribu tena baadaye."
     },
     "inventory_item": {
         "serial_exists": "Kitu cha hesabu chenye namba hii ya msururu tayari kipo.",

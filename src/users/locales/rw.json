@@ -36,6 +36,7 @@
         "already_exists": "Itsinda rifite iyi nimero rirabaho kuri iyi bicuruzwa.",
         "not_found": "Itsinda ntiryabonetse.",
         "create_failed": "Byanze gukora itsinda. Nyamuneka ongera ugerageze.",
+        "creation_failed": "Gukora itsinda byanze: {{reason}}.",
         "list_failed": "Byanze kubona amatsinda. Nyamuneka ongera ugerageze.",
         "query_failed": "Byanze kubaza amatsinda. Nyamuneka ongera ugerageze."
     },

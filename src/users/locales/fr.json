@@ -34,9 +34,10 @@
     },
     "batch": {
         "already_exists": "Un lot avec ce numéro existe déjà pour ce produit.",
-        "not_found": "Lot introuvable.",
+        "not_found": "Lot non trouvé.",
         "create_failed": "Échec de la création du lot. Veuillez réessayer plus tard.",
-        "list_failed": "Échec de la récupération des lots. Veuillez réessayer plus tard.",
+        "creation_failed": "La création du lot a échoué: {{reason}}.",
+        "list_failed": "Échec de la liste des lots. Veuillez réessayer plus tard.",
         "query_failed": "Échec de la requête des lots. Veuillez réessayer plus tard."
     },
     "inventory_item": {
