@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { BatchesService } from './batches.service';
+import { StockService } from '../stock/stock.service';
 
 describe('BatchesService', () => {
   let service: BatchesService;
@@ -11,18 +12,21 @@ describe('BatchesService', () => {
   };
 
   const mockLogs = { record: jest.fn() };
+  const mockStock = { adjustStock: jest.fn() };
 
   beforeEach(async () => {
     mockDb.partitionedFind.mockReset();
     mockDb.insert.mockReset();
     mockDb.get.mockReset();
     mockLogs.record.mockReset();
+    mockStock.adjustStock.mockReset();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BatchesService,
         { provide: 'DATABASE_CONNECTION', useValue: mockDb },
         { provide: 'LogsService', useValue: mockLogs },
+        { provide: StockService, useValue: mockStock },
       ],
     }).compile();
 
@@ -52,8 +56,12 @@ describe('BatchesService', () => {
       // Mock batch doesn't exist
       mockDb.partitionedFind.mockResolvedValue({ docs: [] });
 
-      // Mock insert
-      mockDb.insert.mockResolvedValue({ id: 'batch-id', rev: '1-abc' });
+      // Mock insert - returns the batch ID that was generated
+      const mockBatchId = 'tenant1:batch:mock-batch-id-123';
+      mockDb.insert.mockResolvedValue({ id: mockBatchId, rev: '1-abc' });
+
+      // Mock stock adjustment
+      mockStock.adjustStock.mockResolvedValue({});
 
       const result = await service.create(
         'tenant1',
@@ -64,6 +72,20 @@ describe('BatchesService', () => {
 
       expect(mockDb.get).toHaveBeenCalledWith('tenant1:product:prod1');
       expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockStock.adjustStock).toHaveBeenCalledWith(
+        'tenant1',
+        'user1',
+        'User One',
+        expect.objectContaining({
+          productId: 'tenant1:product:prod1',
+          quantity: 100,
+          type: 'in',
+          purchaseCost: 1000,
+          reason: 'Batch BATCH-001 received',
+          referenceType: 'batch',
+          location: undefined,
+        }),
+      );
       expect(result).toHaveProperty('_id');
       expect(result.quantityReceived).toBe(100);
       expect(result.quantityAvailable).toBe(100);
@@ -100,6 +122,41 @@ describe('BatchesService', () => {
       await expect(
         service.create('tenant1', 'user1', 'User', createDto as any),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should create batch even if stock adjustment fails', async () => {
+      const createDto = {
+        productId: 'prod1',
+        batchNumber: 'BATCH-001',
+        quantity: 100,
+        purchaseCost: 1000,
+      };
+
+      mockDb.get.mockResolvedValue({
+        _id: 'tenant1:product:prod1',
+        sku: 'SKU-001',
+        trackingType: 'batch',
+      });
+
+      mockDb.partitionedFind.mockResolvedValue({ docs: [] });
+      mockDb.insert.mockResolvedValue({
+        id: 'tenant1:batch:batch-id',
+        rev: '1-abc',
+      });
+
+      // Mock stock adjustment fails
+      mockStock.adjustStock.mockRejectedValue(new Error('Stock service error'));
+
+      const result = await service.create(
+        'tenant1',
+        'user1',
+        'User One',
+        createDto as any,
+      );
+
+      expect(mockStock.adjustStock).toHaveBeenCalled();
+      expect(result).toHaveProperty('_id');
+      expect(result.quantityReceived).toBe(100);
     });
   });
 

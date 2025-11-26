@@ -11,6 +11,8 @@ import nano, { type DocumentScope } from 'nano';
 import { v4 as uuidv4 } from 'uuid';
 import { DATABASE_CONNECTION } from '../database/database.constants';
 import { CreateBatchDto } from './dto/create-batch.dto';
+import { StockService } from '../stock/stock.service';
+import { StockReferenceType } from '../stock/stock-reference-type.enum';
 
 @Injectable()
 export class BatchesService {
@@ -18,7 +20,8 @@ export class BatchesService {
 
   constructor(
     @Inject(DATABASE_CONNECTION) private readonly db: DocumentScope<any>,
-    @Inject('LogsService') private readonly logsService?: any,
+    @Inject('LogsService') private readonly logsService: any,
+    private readonly stockService: StockService,
   ) {}
 
   async create(
@@ -117,6 +120,23 @@ export class BatchesService {
 
       const response = await this.db.insert(newBatch);
       const result = { ...newBatch, _rev: response.rev };
+
+      // Automatically adjust stock for batch-tracked products
+      try {
+        await this.stockService.adjustStock(tenantId, userId, userName, {
+          productId: productId,
+          quantity: createDto.quantity,
+          type: 'in',
+          purchaseCost: createDto.purchaseCost,
+          reason: `Batch ${createDto.batchNumber} received`,
+          referenceId: result._id.split(':').pop()!, // Extract batch ID
+          referenceType: StockReferenceType.BATCH,
+          location: createDto.location,
+        });
+      } catch (e) {
+        this.logger.warn('Failed to adjust stock for batch', e as any);
+        // Don't fail batch creation if stock adjustment fails
+      }
 
       // Record log
       try {
