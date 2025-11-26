@@ -39,6 +39,7 @@
         "already_exists": "A batch with this number already exists for this product.",
         "not_found": "Batch not found.",
         "create_failed": "Failed to create batch. Please try again later.",
+        "creation_failed": "Batch creation failed: {{reason}}.",
         "list_failed": "Failed to list batches. Please try again later.",
         "query_failed": "Failed to query batches. Please try again later."
     },

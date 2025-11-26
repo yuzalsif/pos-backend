@@ -9,6 +9,7 @@ describe('BatchesService', () => {
     partitionedFind: jest.fn(),
     insert: jest.fn(),
     get: jest.fn(),
+    destroy: jest.fn(),
   };
 
   const mockLogs = { record: jest.fn() };
@@ -18,6 +19,7 @@ describe('BatchesService', () => {
     mockDb.partitionedFind.mockReset();
     mockDb.insert.mockReset();
     mockDb.get.mockReset();
+    mockDb.destroy.mockReset();
     mockLogs.record.mockReset();
     mockStock.adjustStock.mockReset();
 
@@ -124,7 +126,46 @@ describe('BatchesService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should create batch even if stock adjustment fails', async () => {
+    it('should rollback batch creation if stock adjustment fails', async () => {
+      const createDto = {
+        productId: 'prod1',
+        batchNumber: 'BATCH-001',
+        quantity: 100,
+        purchaseCost: 1000,
+      };
+
+      const mockBatchId = 'tenant1:batch:batch-id';
+      const mockRev = '1-abc';
+
+      mockDb.get.mockResolvedValue({
+        _id: 'tenant1:product:prod1',
+        sku: 'SKU-001',
+        trackingType: 'batch',
+      });
+
+      mockDb.partitionedFind.mockResolvedValue({ docs: [] });
+      mockDb.insert.mockResolvedValue({
+        id: mockBatchId,
+        rev: mockRev,
+      });
+      mockDb.destroy.mockResolvedValue({ ok: true });
+
+      // Mock stock adjustment fails
+      mockStock.adjustStock.mockRejectedValue(new Error('Stock service error'));
+
+      await expect(
+        service.create('tenant1', 'user1', 'User One', createDto as any),
+      ).rejects.toThrow();
+
+      // Verify rollback was called
+      expect(mockStock.adjustStock).toHaveBeenCalled();
+      expect(mockDb.destroy).toHaveBeenCalledWith(
+        expect.stringContaining('batch'),
+        mockRev,
+      );
+    });
+
+    it('should handle rollback failure gracefully', async () => {
       const createDto = {
         productId: 'prod1',
         batchNumber: 'BATCH-001',
@@ -144,19 +185,16 @@ describe('BatchesService', () => {
         rev: '1-abc',
       });
 
-      // Mock stock adjustment fails
+      // Mock both stock adjustment and rollback fail
       mockStock.adjustStock.mockRejectedValue(new Error('Stock service error'));
+      mockDb.destroy.mockRejectedValue(new Error('Rollback failed'));
 
-      const result = await service.create(
-        'tenant1',
-        'user1',
-        'User One',
-        createDto as any,
-      );
+      await expect(
+        service.create('tenant1', 'user1', 'User One', createDto as any),
+      ).rejects.toThrow();
 
-      expect(mockStock.adjustStock).toHaveBeenCalled();
-      expect(result).toHaveProperty('_id');
-      expect(result.quantityReceived).toBe(100);
+      // Verify destroy was attempted
+      expect(mockDb.destroy).toHaveBeenCalled();
     });
   });
 
