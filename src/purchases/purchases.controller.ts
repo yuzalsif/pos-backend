@@ -17,6 +17,7 @@ import {
     CreatePurchaseOrderDto,
     UpdatePurchaseOrderDto,
     ChangePurchaseOrderStatusDto,
+    SendPurchaseOrderEmailDto,
 } from './dto/create-purchase-order.dto';
 import { PurchaseOrderStatus } from './purchases.types';
 
@@ -95,6 +96,22 @@ export class PurchasesController {
             req.userName,
             id,
             statusDto,
+        );
+    }
+
+    @Post(':id/send-email')
+    @RequirePermissions(Permission.PURCHASES_UPDATE)
+    async sendEmail(
+        @Request() req,
+        @Param('id') id: string,
+        @Body() emailDto: SendPurchaseOrderEmailDto,
+    ) {
+        return this.purchasesService.sendEmail(
+            req.tenantId,
+            req.userId,
+            req.userName,
+            id,
+            emailDto,
         );
     }
 }

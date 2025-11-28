@@ -159,6 +159,14 @@ export class SendPurchaseOrderEmailDto {
     @IsOptional()
     message?: string;
 
+    @IsString()
+    @IsOptional()
+    ccEmails?: string; // Comma-separated emails
+
+    @IsString()
+    @IsOptional()
+    locale?: string; // en, fr, ar, sw, rw
+
     @IsOptional()
     attachPdf?: boolean;
 }

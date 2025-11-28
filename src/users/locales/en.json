@@ -84,7 +84,10 @@
         "expected_delivery_date_past": "Expected delivery date must be in the future.",
         "cannot_update_non_draft": "Cannot update purchase order with status {{status}}. Only draft orders can be updated.",
         "invalid_status_transition": "Cannot change status from {{from}} to {{to}}.",
-        "status_change_failed": "Failed to change purchase order status. Please try again later."
+        "status_change_failed": "Failed to change purchase order status. Please try again later.",
+        "cannot_send_non_draft": "Cannot send purchase order with status {{status}}. Only draft or pending orders can be sent.",
+        "no_supplier_email": "Supplier email not found. Please provide a recipient email.",
+        "email_send_failed": "Failed to send purchase order email: {{error}}"
     },
     "uom": {
         "exists": "A unit of measure with this code already exists.",

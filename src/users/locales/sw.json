@@ -81,7 +81,10 @@
         "expected_delivery_date_past": "Tarehe inayotarajiwa ya utoaji lazima iwe siku zijazo.",
         "cannot_update_non_draft": "Haiwezi kusasisha oda ya ununuzi yenye hali ya {{status}}. Oda za rasimu pekee zinaweza kusasishwa.",
         "invalid_status_transition": "Haiwezi kubadilisha hali kutoka {{from}} hadi {{to}}.",
-        "status_change_failed": "Imeshindwa kubadilisha hali ya oda ya ununuzi. Tafadhali jaribu tena baadaye."
+        "status_change_failed": "Imeshindwa kubadilisha hali ya oda ya ununuzi. Tafadhali jaribu tena baadaye.",
+        "cannot_send_non_draft": "Haiwezi kutuma oda ya ununuzi yenye hali ya {{status}}. Oda za rasimu au zinazosubiri pekee zinaweza kutumwa.",
+        "no_supplier_email": "Barua pepe ya msambazaji haijapatikana. Tafadhali toa barua pepe ya mpokeaji.",
+        "email_send_failed": "Imeshindwa kutuma barua pepe ya oda ya ununuzi: {{error}}"
     },
     "uom": {
         "exists": "Kitengo cha kipimo chenye msimbo huo tayari kipo.",

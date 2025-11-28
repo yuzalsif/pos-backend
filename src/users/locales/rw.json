@@ -81,7 +81,10 @@
         "expected_delivery_date_past": "Itariki iteganijwe yo gutanga igomba kuba ejo hazaza.",
         "cannot_update_non_draft": "Ntushobora kuvugurura itegeko ryo kugura rifite imiterere ya {{status}}. Amategeko yanditse gusa arashobora kuvugururwa.",
         "invalid_status_transition": "Ntushobora guhindura imiterere kuva {{from}} kugeza {{to}}.",
-        "status_change_failed": "Byanze guhindura imiterere y'itegeko ryo kugura. Nyamuneka ongera ugerageze."
+        "status_change_failed": "Byanze guhindura imiterere y'itegeko ryo kugura. Nyamuneka ongera ugerageze.",
+        "cannot_send_non_draft": "Ntushobora kohereza itegeko ryo kugura rifite imiterere ya {{status}}. Amategeko yanditse cyangwa ategereje gusa arashobora koherezwa.",
+        "no_supplier_email": "Imeri y'umutanga ntiryabonetse. Nyamuneka tanga imeri y'uwakiriye.",
+        "email_send_failed": "Byanze kohereza imeri y'itegeko ryo kugura: {{error}}"
     },
     "uom": {
         "exists": "Uburyo bwo gupima bufite uwo mwirondoro busanzwe bubaho.",

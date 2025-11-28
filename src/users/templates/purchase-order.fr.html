@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bon de Commande {{poNumber}}</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
+            Bon de Commande {{poNumber}}
+        </h1>
+
+        {{#if customMessage}}
+        <p style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0;">
+            {{customMessage}}
+        </p>
+        {{/if}}
+
+        <div style="margin: 30px 0;">
+            <h2 style="color: #2c3e50; font-size: 18px;">Informations sur l'entreprise</h2>
+            <p>
+                <strong>{{companyName}}</strong><br>
+                {{companyAddress}}<br>
+                Téléphone: {{companyPhone}}<br>
+                Email: {{companyEmail}}
+            </p>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <h2 style="color: #2c3e50; font-size: 18px;">Informations sur le fournisseur</h2>
+            <p>
+                <strong>{{supplierName}}</strong><br>
+                {{supplierAddress}}<br>
+                Téléphone: {{supplierPhone}}<br>
+                Email: {{supplierEmail}}
+            </p>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <p><strong>Date de commande:</strong> {{orderDate}}</p>
+            {{#if expectedDeliveryDate}}
+            <p><strong>Livraison prévue:</strong> {{expectedDeliveryDate}}</p>
+            {{/if}}
+            <p><strong>Statut:</strong> <span
+                    style="background-color: #3498db; color: white; padding: 4px 8px; border-radius: 4px;">{{status}}</span>
+            </p>
+        </div>
+
+        <h2 style="color: #2c3e50; font-size: 18px; margin-top: 30px;">Articles commandés</h2>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr style="background-color: #3498db; color: white;">
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">SKU</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Produit</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Quantité</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Coût unitaire</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{itemsRows}}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>Sous-total:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>{{subtotal}}</strong>
+                    </td>
+                </tr>
+                {{#if taxAmount}}
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>Taxe:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>{{taxAmount}}</strong>
+                    </td>
+                </tr>
+                {{/if}}
+                {{#if shippingCost}}
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>Livraison:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>{{shippingCost}}</strong></td>
+                </tr>
+                {{/if}}
+                {{#if discountAmount}}
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>Remise:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>-{{discountAmount}}</strong></td>
+                </tr>
+                {{/if}}
+                <tr style="background-color: #f8f9fa;">
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>Montant
+                            total:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong
+                            style="font-size: 18px; color: #2c3e50;">{{totalAmount}}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        {{#if notes}}
+        <div style="margin: 30px 0;">
+            <h3 style="color: #2c3e50;">Remarques:</h3>
+            <p>{{notes}}</p>
+        </div>
+        {{/if}}
+
+        <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #ddd; font-size: 12px; color: #666;">
+            <p>Ceci est un email généré automatiquement. Veuillez ne pas répondre à cet email.</p>
+            <p>Pour toute question, veuillez nous contacter à {{companyEmail}}</p>
+        </div>
+    </div>
+</body>
+
+</html>

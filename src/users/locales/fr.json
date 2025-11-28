@@ -81,7 +81,10 @@
         "expected_delivery_date_past": "La date de livraison prévue doit être dans le futur.",
         "cannot_update_non_draft": "Impossible de mettre à jour le bon de commande avec le statut {{status}}. Seules les commandes en brouillon peuvent être mises à jour.",
         "invalid_status_transition": "Impossible de changer le statut de {{from}} à {{to}}.",
-        "status_change_failed": "Échec du changement de statut du bon de commande. Veuillez réessayer plus tard."
+        "status_change_failed": "Échec du changement de statut du bon de commande. Veuillez réessayer plus tard.",
+        "cannot_send_non_draft": "Impossible d'envoyer le bon de commande avec le statut {{status}}. Seules les commandes en brouillon ou en attente peuvent être envoyées.",
+        "no_supplier_email": "Email du fournisseur introuvable. Veuillez fournir un email de destinataire.",
+        "email_send_failed": "Échec de l'envoi de l'email du bon de commande: {{error}}"
     },
     "uom": {
         "exists": "Une unité de mesure avec ce code existe déjà.",

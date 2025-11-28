@@ -27,6 +27,7 @@ export class PurchasesService {
     constructor(
         @Inject(DATABASE_CONNECTION) private db: DocumentScope<any>,
         private readonly logsService: LogsService,
+        @Inject('MailService') private readonly mailService: any,
     ) { }
 
     private readonly logger = {
@@ -594,5 +595,185 @@ export class PurchasesService {
                 key: 'purchase.query_failed',
             });
         }
+    }
+
+    /**
+     * Send purchase order to supplier via email
+     * Changes status from draft to pending
+     */
+    async sendEmail(
+        tenantId: string,
+        userId: string,
+        userName: string,
+        poId: string,
+        dto: SendPurchaseOrderEmailDto,
+    ): Promise<PurchaseOrder> {
+        try {
+            // Get the purchase order
+            const po = await this.findOne(tenantId, poId);
+
+            // Validate: Can only send draft or pending POs
+            if (
+                po.status !== PurchaseOrderStatus.DRAFT &&
+                po.status !== PurchaseOrderStatus.PENDING
+            ) {
+                throw new BadRequestException({
+                    key: 'purchase.cannot_send_non_draft',
+                    vars: { status: po.status },
+                });
+            }
+
+            // Get supplier info
+            const supplier = await this.db.get(po.supplierId);
+
+            // Prepare email content
+            const subject = `Purchase Order ${po.poNumber} from ${po.companyInfo?.name || 'Company'}`;
+
+            const emailTo = dto.recipientEmail || supplier.email;
+            if (!emailTo) {
+                throw new BadRequestException({
+                    key: 'purchase.no_supplier_email',
+                });
+            }
+
+            // Build email body using template
+            const locale = dto.locale || 'en';
+            const { html, text } = this.buildPurchaseOrderEmailBody(
+                po,
+                supplier,
+                dto.message,
+                locale,
+            );
+
+            // Parse CC emails
+            const ccEmails = dto.ccEmails
+                ? dto.ccEmails.split(',').map((e) => e.trim()).filter(Boolean)
+                : [];
+
+            // Send email
+            const emailResult = await this.mailService.sendEmail({
+                to: [emailTo, ...ccEmails],
+                subject,
+                html,
+                text,
+            });
+
+            if (!emailResult.success) {
+                throw new InternalServerErrorException({
+                    key: 'purchase.email_send_failed',
+                    vars: { error: emailResult.error || 'Unknown error' },
+                });
+            }
+
+            // Update PO status to pending if it was draft
+            const now = new Date().toISOString();
+            if (po.status === PurchaseOrderStatus.DRAFT) {
+                po.status = PurchaseOrderStatus.PENDING;
+                po.updatedAt = now;
+                po.updatedBy = { userId, name: userName };
+            }
+
+            // Add email history
+            if (!po.emailHistory) {
+                po.emailHistory = [];
+            }
+
+            po.emailHistory.push({
+                sentAt: now,
+                sentBy: { userId, name: userName },
+                recipientEmail: emailTo,
+                ccEmails: ccEmails.length > 0 ? ccEmails : undefined,
+                status: 'sent',
+            });
+
+            // Update in database
+            const response = await this.db.insert(po);
+
+            // Log the action
+            try {
+                await this.logsService.record(
+                    tenantId,
+                    { userId, name: userName },
+                    'purchase.email_sent',
+                    'purchase',
+                    po._id,
+                    {
+                        poNumber: po.poNumber,
+                        recipientEmail: emailTo,
+                        status: po.status,
+                    },
+                );
+            } catch (logError) {
+                this.logger.warn('Failed to log email sending', logError);
+            }
+
+            return { ...po, _rev: response.rev };
+        } catch (error) {
+            if (
+                error instanceof NotFoundException ||
+                error instanceof BadRequestException
+            ) {
+                throw error;
+            }
+
+            this.logger.error('Failed to send purchase order email', error);
+            throw new InternalServerErrorException({
+                key: 'purchase.email_send_failed',
+                vars: { error: (error as any).message || 'Unknown error' },
+            });
+        }
+    }
+
+    /**
+     * Build HTML email body for purchase order using template
+     */
+    private buildPurchaseOrderEmailBody(
+        po: PurchaseOrder,
+        supplier: any,
+        customMessage?: string,
+        locale = 'en',
+    ): { html: string; text: string } {
+        // Generate item rows HTML
+        const itemsRows = po.items
+            .map(
+                (item) => `
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.sku}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.productName}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.quantityOrdered}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${item.unitCost.toFixed(2)}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${item.lineTotal.toFixed(2)}</td>
+            </tr>
+        `,
+            )
+            .join('');
+
+        // Prepare template variables
+        const templateVars = {
+            poNumber: po.poNumber,
+            customMessage: customMessage || '',
+            companyName: po.companyInfo?.name || 'N/A',
+            companyAddress: po.companyInfo?.address || '',
+            companyPhone: po.companyInfo?.phone || 'N/A',
+            companyEmail: po.companyInfo?.email || 'N/A',
+            supplierName: supplier.name,
+            supplierAddress: supplier.address || '',
+            supplierPhone: supplier.phone || 'N/A',
+            supplierEmail: supplier.email || 'N/A',
+            orderDate: new Date(po.orderDate).toLocaleDateString(),
+            expectedDeliveryDate: po.expectedDeliveryDate
+                ? new Date(po.expectedDeliveryDate).toLocaleDateString()
+                : '',
+            status: po.status,
+            itemsRows,
+            subtotal: po.subtotal.toFixed(2),
+            taxAmount: po.taxAmount > 0 ? po.taxAmount.toFixed(2) : '',
+            shippingCost: po.shippingCost > 0 ? po.shippingCost.toFixed(2) : '',
+            discountAmount: po.discountAmount > 0 ? po.discountAmount.toFixed(2) : '',
+            totalAmount: po.totalAmount.toFixed(2),
+            notes: po.notes || '',
+        };
+
+        return this.mailService.renderPurchaseOrderTemplate(locale, templateVars);
     }
 }

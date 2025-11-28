@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Oda ya Ununuzi {{poNumber}}</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
+            Oda ya Ununuzi {{poNumber}}
+        </h1>
+
+        {{#if customMessage}}
+        <p style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0;">
+            {{customMessage}}
+        </p>
+        {{/if}}
+
+        <div style="margin: 30px 0;">
+            <h2 style="color: #2c3e50; font-size: 18px;">Taarifa za Kampuni</h2>
+            <p>
+                <strong>{{companyName}}</strong><br>
+                {{companyAddress}}<br>
+                Simu: {{companyPhone}}<br>
+                Barua pepe: {{companyEmail}}
+            </p>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <h2 style="color: #2c3e50; font-size: 18px;">Taarifa za Msambazaji</h2>
+            <p>
+                <strong>{{supplierName}}</strong><br>
+                {{supplierAddress}}<br>
+                Simu: {{supplierPhone}}<br>
+                Barua pepe: {{supplierEmail}}
+            </p>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <p><strong>Tarehe ya oda:</strong> {{orderDate}}</p>
+            {{#if expectedDeliveryDate}}
+            <p><strong>Utoaji unatarajiwa:</strong> {{expectedDeliveryDate}}</p>
+            {{/if}}
+            <p><strong>Hali:</strong> <span
+                    style="background-color: #3498db; color: white; padding: 4px 8px; border-radius: 4px;">{{status}}</span>
+            </p>
+        </div>
+
+        <h2 style="color: #2c3e50; font-size: 18px; margin-top: 30px;">Vitu vilivyoagizwa</h2>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr style="background-color: #3498db; color: white;">
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">SKU</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Bidhaa</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Kiasi</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Bei ya kipande</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Jumla</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{itemsRows}}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>Jumla
+                            ndogo:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>{{subtotal}}</strong>
+                    </td>
+                </tr>
+                {{#if taxAmount}}
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>Kodi:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>{{taxAmount}}</strong>
+                    </td>
+                </tr>
+                {{/if}}
+                {{#if shippingCost}}
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>Usafirishaji:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>{{shippingCost}}</strong></td>
+                </tr>
+                {{/if}}
+                {{#if discountAmount}}
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>Punguzo:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">
+                        <strong>-{{discountAmount}}</strong></td>
+                </tr>
+                {{/if}}
+                <tr style="background-color: #f8f9fa;">
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>Jumla ya
+                            Kiasi:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong
+                            style="font-size: 18px; color: #2c3e50;">{{totalAmount}}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        {{#if notes}}
+        <div style="margin: 30px 0;">
+            <h3 style="color: #2c3e50;">Maelezo:</h3>
+            <p>{{notes}}</p>
+        </div>
+        {{/if}}
+
+        <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #ddd; font-size: 12px; color: #666;">
+            <p>Hii ni barua pepe iliyoundwa kiotomatiki. Tafadhali usijibu barua pepe hii.</p>
+            <p>Ikiwa una maswali yoyote, tafadhali wasiliana nasi kwa {{companyEmail}}</p>
+        </div>
+    </div>
+</body>
+
+</html>
