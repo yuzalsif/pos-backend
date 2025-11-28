@@ -69,6 +69,23 @@
         "list_failed": "Failed to list suppliers. Please try again later.",
         "not_found": "Supplier not found."
     },
+    "purchase": {
+        "not_found": "Purchase order not found.",
+        "not_found_by_number": "Purchase order {{poNumber}} not found.",
+        "create_failed": "Failed to create purchase order. Please try again later.",
+        "update_failed": "Failed to update purchase order. Please try again later.",
+        "list_failed": "Failed to list purchase orders. Please try again later.",
+        "query_failed": "Failed to query purchase orders. Please try again later.",
+        "generate_number_failed": "Failed to generate purchase order number. Please try again later.",
+        "supplier_not_active": "Supplier {{supplierName}} is not active.",
+        "invalid_quantity": "Invalid quantity for product {{sku}}.",
+        "invalid_price": "Invalid price for product {{sku}}.",
+        "invalid_item_data": "Invalid item data for product {{sku}}.",
+        "expected_delivery_date_past": "Expected delivery date must be in the future.",
+        "cannot_update_non_draft": "Cannot update purchase order with status {{status}}. Only draft orders can be updated.",
+        "invalid_status_transition": "Cannot change status from {{from}} to {{to}}.",
+        "status_change_failed": "Failed to change purchase order status. Please try again later."
+    },
     "uom": {
         "exists": "A unit of measure with this code already exists.",
         "create_failed": "Failed to create unit of measure. Please try again later.",

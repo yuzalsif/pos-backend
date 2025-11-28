@@ -66,6 +66,23 @@
         "list_failed": "Ntibyashobotse kubona urutonde rw'abacuruzi. Gerageza nyuma.",
         "not_found": "Umucuruzi ntabonetse."
     },
+    "purchase": {
+        "not_found": "Itegeko ryo kugura ntiryabonetse.",
+        "not_found_by_number": "Itegeko ryo kugura {{poNumber}} ntiryabonetse.",
+        "create_failed": "Byanze gukora itegeko ryo kugura. Nyamuneka ongera ugerageze.",
+        "update_failed": "Byanze kuvugurura itegeko ryo kugura. Nyamuneka ongera ugerageze.",
+        "list_failed": "Byanze kubona amategeko yo kugura. Nyamuneka ongera ugerageze.",
+        "query_failed": "Byanze kubaza amategeko yo kugura. Nyamuneka ongera ugerageze.",
+        "generate_number_failed": "Byanze gukora nomero y'itegeko ryo kugura. Nyamuneka ongera ugerageze.",
+        "supplier_not_active": "Umutanga {{supplierName}} ntabwo akora.",
+        "invalid_quantity": "Umubare utemewe ku bicuruzwa {{sku}}.",
+        "invalid_price": "Igiciro kitemewe ku bicuruzwa {{sku}}.",
+        "invalid_item_data": "Amakuru y'ikintu atemewe ku bicuruzwa {{sku}}.",
+        "expected_delivery_date_past": "Itariki iteganijwe yo gutanga igomba kuba ejo hazaza.",
+        "cannot_update_non_draft": "Ntushobora kuvugurura itegeko ryo kugura rifite imiterere ya {{status}}. Amategeko yanditse gusa arashobora kuvugururwa.",
+        "invalid_status_transition": "Ntushobora guhindura imiterere kuva {{from}} kugeza {{to}}.",
+        "status_change_failed": "Byanze guhindura imiterere y'itegeko ryo kugura. Nyamuneka ongera ugerageze."
+    },
     "uom": {
         "exists": "Uburyo bwo gupima bufite uwo mwirondoro busanzwe bubaho.",
         "create_failed": "Ntibyashobotse gushyiraho uburyo bwo gupima. Gerageza nyuma.",

@@ -15,6 +15,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { BatchesModule } from './batches/batches.module';
 import { InventoryItemsModule } from './inventory-items/inventory-items.module';
 import { StockModule } from './stock/stock.module';
+import { PurchasesModule } from './purchases/purchases.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StockModule } from './stock/stock.module';
     LogsModule,
     AccountsModule,
     CategoriesModule,
+    PurchasesModule,
     DatabaseModule,
     BatchesModule,
     InventoryItemsModule,
@@ -36,4 +38,4 @@ import { StockModule } from './stock/stock.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

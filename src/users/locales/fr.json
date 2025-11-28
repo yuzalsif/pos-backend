@@ -66,6 +66,23 @@
         "list_failed": "Échec de la récupération de la liste des fournisseurs. Veuillez réessayer plus tard.",
         "not_found": "Fournisseur introuvable."
     },
+    "purchase": {
+        "not_found": "Bon de commande non trouvé.",
+        "not_found_by_number": "Bon de commande {{poNumber}} non trouvé.",
+        "create_failed": "Échec de la création du bon de commande. Veuillez réessayer plus tard.",
+        "update_failed": "Échec de la mise à jour du bon de commande. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la liste des bons de commande. Veuillez réessayer plus tard.",
+        "query_failed": "Échec de la requête des bons de commande. Veuillez réessayer plus tard.",
+        "generate_number_failed": "Échec de la génération du numéro de bon de commande. Veuillez réessayer plus tard.",
+        "supplier_not_active": "Le fournisseur {{supplierName}} n'est pas actif.",
+        "invalid_quantity": "Quantité invalide pour le produit {{sku}}.",
+        "invalid_price": "Prix invalide pour le produit {{sku}}.",
+        "invalid_item_data": "Données d'article invalides pour le produit {{sku}}.",
+        "expected_delivery_date_past": "La date de livraison prévue doit être dans le futur.",
+        "cannot_update_non_draft": "Impossible de mettre à jour le bon de commande avec le statut {{status}}. Seules les commandes en brouillon peuvent être mises à jour.",
+        "invalid_status_transition": "Impossible de changer le statut de {{from}} à {{to}}.",
+        "status_change_failed": "Échec du changement de statut du bon de commande. Veuillez réessayer plus tard."
+    },
     "uom": {
         "exists": "Une unité de mesure avec ce code existe déjà.",
         "create_failed": "Échec de la création de l'unité de mesure. Veuillez réessayer plus tard.",

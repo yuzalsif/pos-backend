@@ -66,6 +66,23 @@
         "list_failed": "Imeshindikana kupata orodha ya wauzaji. Tafadhali jaribu tena baadaye.",
         "not_found": "Muuzaji hayupo."
     },
+    "purchase": {
+        "not_found": "Oda ya ununuzi haijapatikana.",
+        "not_found_by_number": "Oda ya ununuzi {{poNumber}} haijapatikana.",
+        "create_failed": "Imeshindwa kuunda oda ya ununuzi. Tafadhali jaribu tena baadaye.",
+        "update_failed": "Imeshindwa kusasisha oda ya ununuzi. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindwa kuorodhesha oda za ununuzi. Tafadhali jaribu tena baadaye.",
+        "query_failed": "Imeshindwa kutafuta oda za ununuzi. Tafadhali jaribu tena baadaye.",
+        "generate_number_failed": "Imeshindwa kutengeneza nambari ya oda ya ununuzi. Tafadhali jaribu tena baadaye.",
+        "supplier_not_active": "Msambazaji {{supplierName}} hayupo hai.",
+        "invalid_quantity": "Kiasi batili kwa bidhaa {{sku}}.",
+        "invalid_price": "Bei batili kwa bidhaa {{sku}}.",
+        "invalid_item_data": "Data ya kipengee batili kwa bidhaa {{sku}}.",
+        "expected_delivery_date_past": "Tarehe inayotarajiwa ya utoaji lazima iwe siku zijazo.",
+        "cannot_update_non_draft": "Haiwezi kusasisha oda ya ununuzi yenye hali ya {{status}}. Oda za rasimu pekee zinaweza kusasishwa.",
+        "invalid_status_transition": "Haiwezi kubadilisha hali kutoka {{from}} hadi {{to}}.",
+        "status_change_failed": "Imeshindwa kubadilisha hali ya oda ya ununuzi. Tafadhali jaribu tena baadaye."
+    },
     "uom": {
         "exists": "Kitengo cha kipimo chenye msimbo huo tayari kipo.",
         "create_failed": "Imeshindikana kuunda kitengo cha kipimo. Tafadhali jaribu tena baadaye.",
