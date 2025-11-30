@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InventoryItemsService } from './inventory-items.service';
 import { LogsService } from '../logs/logs.service';
 import { BatchesService } from '../batches/batches.service';
@@ -19,7 +23,7 @@ describe('InventoryItemsService', () => {
   const mockStock = { adjustStock: jest.fn() };
 
   beforeEach(async () => {
-    mockDb.partitionedFind.mockReset();
+    mockDb.partitionedFind.mockReset().mockResolvedValue({ docs: [] });
     mockDb.insert.mockReset();
     mockDb.get.mockReset();
     mockLogs.record.mockReset();
@@ -272,6 +276,226 @@ describe('InventoryItemsService', () => {
           status: 'sold',
         } as any),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('createOpeningStock', () => {
+    const tenantId = 'tenant1';
+    const userId = 'user1';
+    const userName = 'Test User';
+
+    it('should create opening stock for regular (non-tracked) products', async () => {
+      const openingStockDto = {
+        entryDate: '2025-11-30',
+        location: 'Main Warehouse',
+        items: [
+          {
+            productId: 'prod1',
+            quantity: 100,
+            unitCost: 50,
+            notes: 'Initial stock',
+          },
+        ],
+        notes: 'Opening inventory',
+      };
+
+      const mockProduct = {
+        _id: `${tenantId}:product:prod1`,
+        sku: 'PROD-001',
+        name: 'Test Product',
+        trackingType: 'none',
+      };
+
+      mockDb.get.mockResolvedValue(mockProduct);
+      mockStock.adjustStock.mockResolvedValue({ success: true });
+      mockDb.insert.mockResolvedValue({ id: 'opening-stock-id', rev: '1-abc' });
+
+      const result = await service.createOpeningStock(
+        tenantId,
+        userId,
+        userName,
+        openingStockDto as any,
+      );
+
+      expect(mockStock.adjustStock).toHaveBeenCalledWith(
+        tenantId,
+        userId,
+        userName,
+        expect.objectContaining({
+          productId: `${tenantId}:product:prod1`,
+          quantity: 100,
+          referenceType: 'opening_stock',
+          type: 'in',
+        }),
+      );
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockLogs.record).toHaveBeenCalled();
+      expect(result).toHaveProperty('entryNumber');
+      expect(result.items[0].quantity).toBe(100);
+    });
+
+    it('should create opening stock for batch-tracked products', async () => {
+      const openingStockDto = {
+        entryDate: '2025-11-30',
+        location: 'Main Warehouse',
+        items: [
+          {
+            productId: 'prod2',
+            quantity: 50,
+            unitCost: 75,
+            batchNumber: 'BATCH-001',
+            expiryDate: '2025-12-31',
+          },
+        ],
+      };
+
+      const mockProduct = {
+        _id: `${tenantId}:product:prod2`,
+        sku: 'PROD-002',
+        name: 'Batch Product',
+        trackingType: 'batch',
+      };
+
+      mockDb.get.mockResolvedValue(mockProduct);
+      mockBatches.create.mockResolvedValue({
+        _id: `${tenantId}:batch:batch-id`,
+        batchNumber: 'BATCH-001',
+        productId: 'prod2',
+        quantity: 50,
+        expiryDate: '2025-12-31',
+      });
+      mockDb.insert.mockResolvedValue({ id: 'opening-stock-id', rev: '1-abc' });
+
+      const result = await service.createOpeningStock(
+        tenantId,
+        userId,
+        userName,
+        openingStockDto as any,
+      );
+
+      expect(mockBatches.create).toHaveBeenCalledWith(
+        tenantId,
+        userId,
+        userName,
+        expect.objectContaining({
+          productId: `${tenantId}:product:prod2`,
+          batchNumber: 'BATCH-001',
+          quantity: 50,
+          expiryDate: '2025-12-31',
+          purchaseCost: 75,
+        }),
+      );
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(result.batchIds).toContain(`${tenantId}:batch:batch-id`);
+      expect(result.items[0].batchNumber).toBe('BATCH-001');
+    });
+
+    it('should create opening stock for serial-tracked products', async () => {
+      const openingStockDto = {
+        entryDate: '2025-11-30',
+        location: 'Main Warehouse',
+        items: [
+          {
+            productId: 'prod3',
+            quantity: 3,
+            unitCost: 500,
+            serialNumbers: ['SN001', 'SN002', 'SN003'],
+          },
+        ],
+      };
+
+      const mockProduct = {
+        _id: `${tenantId}:product:prod3`,
+        sku: 'PROD-003',
+        name: 'Serial Product',
+        trackingType: 'serial',
+      };
+
+      mockDb.get.mockResolvedValue(mockProduct);
+      mockDb.partitionedFind.mockResolvedValue({ docs: [] }); // No existing serials
+      mockDb.insert
+        .mockResolvedValueOnce({ id: 'item-id-1', rev: '1-abc' })
+        .mockResolvedValueOnce({ id: 'item-id-2', rev: '1-def' })
+        .mockResolvedValueOnce({ id: 'item-id-3', rev: '1-ghi' })
+        .mockResolvedValueOnce({ id: 'opening-stock-id', rev: '1-jkl' });
+
+      const result = await service.createOpeningStock(
+        tenantId,
+        userId,
+        userName,
+        openingStockDto as any,
+      );
+
+      expect(mockDb.insert).toHaveBeenCalledTimes(4); // 3 inventory items + 1 opening stock record
+      expect(result.serialIds).toHaveLength(3);
+      expect(result.items[0].serialNumbers).toEqual(['SN001', 'SN002', 'SN003']);
+    });
+
+    it('should throw BadRequestException if serial count mismatch', async () => {
+      const openingStockDto = {
+        entryDate: '2025-11-30',
+        location: 'Main Warehouse',
+        items: [
+          {
+            productId: 'prod3',
+            quantity: 5,
+            unitCost: 500,
+            serialNumbers: ['SN001', 'SN002'], // Only 2 serials for 5 quantity
+          },
+        ],
+      };
+
+      const mockProduct = {
+        _id: `${tenantId}:product:prod3`,
+        sku: 'PROD-003',
+        name: 'Serial Product',
+        trackingType: 'serial',
+      };
+
+      mockDb.get.mockResolvedValue(mockProduct);
+
+      await expect(
+        service.createOpeningStock(tenantId, userId, userName, openingStockDto as any),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should generate unique opening stock entry numbers', async () => {
+      const openingStockDto = {
+        entryDate: '2025-11-30',
+        location: 'Main Warehouse',
+        items: [
+          {
+            productId: 'prod1',
+            quantity: 10,
+            unitCost: 50,
+          },
+        ],
+      };
+
+      const mockProduct = {
+        _id: `${tenantId}:product:prod1`,
+        sku: 'PROD-001',
+        name: 'Test Product',
+        trackingType: 'none',
+      };
+
+      // Mock existing entry with same date
+      mockDb.partitionedFind.mockResolvedValueOnce({
+        docs: [{ entryNumber: 'OS-20251130-001' }],
+      });
+
+      mockDb.get.mockResolvedValue(mockProduct);
+      mockStock.adjustStock.mockResolvedValue({ success: true });
+      mockDb.insert.mockResolvedValue({ id: 'opening-stock-id', rev: '1-abc' });
+
+      const result = await service.createOpeningStock(
+        tenantId,
+        userId,
+        userName,
+        openingStockDto as any,
+      );
+
+      expect(result.entryNumber).toBe('OS-20251130-002');
     });
   });
 });
