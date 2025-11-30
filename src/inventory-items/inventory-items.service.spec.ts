@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { InventoryItemsService } from './inventory-items.service';
 import { LogsService } from '../logs/logs.service';
+import { BatchesService } from '../batches/batches.service';
+import { StockService } from '../stock/stock.service';
 
 describe('InventoryItemsService', () => {
   let service: InventoryItemsService;
@@ -13,17 +15,24 @@ describe('InventoryItemsService', () => {
 
   const mockLogs = { record: jest.fn() };
 
+  const mockBatches = { create: jest.fn() };
+  const mockStock = { adjustStock: jest.fn() };
+
   beforeEach(async () => {
     mockDb.partitionedFind.mockReset();
     mockDb.insert.mockReset();
     mockDb.get.mockReset();
     mockLogs.record.mockReset();
+    mockBatches.create.mockReset();
+    mockStock.adjustStock.mockReset();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InventoryItemsService,
         { provide: 'DATABASE_CONNECTION', useValue: mockDb },
         { provide: LogsService, useValue: mockLogs },
+        { provide: BatchesService, useValue: mockBatches },
+        { provide: StockService, useValue: mockStock },
       ],
     }).compile();
 
