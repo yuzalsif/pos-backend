@@ -84,7 +84,14 @@
         "status_change_failed": "Échec du changement de statut du bon de commande. Veuillez réessayer plus tard.",
         "cannot_send_non_draft": "Impossible d'envoyer le bon de commande avec le statut {{status}}. Seules les commandes en brouillon ou en attente peuvent être envoyées.",
         "no_supplier_email": "Email du fournisseur introuvable. Veuillez fournir un email de destinataire.",
-        "email_send_failed": "Échec de l'envoi de l'email du bon de commande: {{error}}"
+        "email_send_failed": "Échec de l'envoi de l'email du bon de commande: {{error}}",
+        "cannot_receive_status": "Impossible de recevoir du stock pour le bon de commande avec le statut {{status}}. Seules les commandes en attente ou partielles peuvent recevoir du stock.",
+        "product_not_in_po": "Le produit {{productId}} ne fait pas partie de ce bon de commande.",
+        "overdelivery_not_allowed": "Impossible de recevoir {{quantityReceiving}} unités de {{sku}}. Seulement {{remainingQuantity}} unités restantes à recevoir.",
+        "batch_creation_failed": "Échec de la création du lot {{batchNumber}}. Réception annulée.",
+        "stock_adjustment_failed": "Échec de l'ajustement des niveaux de stock. Réception annulée.",
+        "receive_failed": "Échec de la réception du stock. Veuillez réessayer plus tard.",
+        "receive_stock": "Stock reçu pour le bon de commande {{poNumber}}"
     },
     "uom": {
         "exists": "Une unité de mesure avec ce code existe déjà.",

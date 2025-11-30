@@ -84,7 +84,14 @@
         "status_change_failed": "Imeshindwa kubadilisha hali ya oda ya ununuzi. Tafadhali jaribu tena baadaye.",
         "cannot_send_non_draft": "Haiwezi kutuma oda ya ununuzi yenye hali ya {{status}}. Oda za rasimu au zinazosubiri pekee zinaweza kutumwa.",
         "no_supplier_email": "Barua pepe ya msambazaji haijapatikana. Tafadhali toa barua pepe ya mpokeaji.",
-        "email_send_failed": "Imeshindwa kutuma barua pepe ya oda ya ununuzi: {{error}}"
+        "email_send_failed": "Imeshindwa kutuma barua pepe ya oda ya ununuzi: {{error}}",
+        "cannot_receive_status": "Haiwezi kupokea hisa kwa oda ya ununuzi yenye hali ya {{status}}. Oda zinazosubiri au za sehemu pekee zinaweza kupokea hisa.",
+        "product_not_in_po": "Bidhaa {{productId}} haiko katika oda hii ya ununuzi.",
+        "overdelivery_not_allowed": "Haiwezi kupokea vipimo {{quantityReceiving}} vya {{sku}}. Vipimo {{remainingQuantity}} pekee vimebaki kupokea.",
+        "batch_creation_failed": "Imeshindwa kuunda kundi {{batchNumber}}. Upokezi umeghairiwa.",
+        "stock_adjustment_failed": "Imeshindwa kurekebisha viwango vya hisa. Upokezi umeghairiwa.",
+        "receive_failed": "Imeshindwa kupokea hisa. Tafadhali jaribu tena baadaye.",
+        "receive_stock": "Hisa imepokelewa kwa oda ya ununuzi {{poNumber}}"
     },
     "uom": {
         "exists": "Kitengo cha kipimo chenye msimbo huo tayari kipo.",

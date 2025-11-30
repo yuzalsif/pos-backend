@@ -84,7 +84,14 @@
         "status_change_failed": "Byanze guhindura imiterere y'itegeko ryo kugura. Nyamuneka ongera ugerageze.",
         "cannot_send_non_draft": "Ntushobora kohereza itegeko ryo kugura rifite imiterere ya {{status}}. Amategeko yanditse cyangwa ategereje gusa arashobora koherezwa.",
         "no_supplier_email": "Imeri y'umutanga ntiryabonetse. Nyamuneka tanga imeri y'uwakiriye.",
-        "email_send_failed": "Byanze kohereza imeri y'itegeko ryo kugura: {{error}}"
+        "email_send_failed": "Byanze kohereza imeri y'itegeko ryo kugura: {{error}}",
+        "cannot_receive_status": "Ntushobora kwakira ububiko bw'itegeko ryo kugura rifite imiterere ya {{status}}. Amategeko ategereje cyangwa agice gusa arashobora kwakira ububiko.",
+        "product_not_in_po": "Igicuruzwa {{productId}} ntabwo kiri muri iri tegeko ryo kugura.",
+        "overdelivery_not_allowed": "Ntushobora kwakira ibipimo {{quantityReceiving}} bya {{sku}}. Ibipimo {{remainingQuantity}} gusa byasigaye kwakira.",
+        "batch_creation_failed": "Byanze gukora itsinda {{batchNumber}}. Kwakira byahagaritswe.",
+        "stock_adjustment_failed": "Byanze guhindura urwego rw'ububiko. Kwakira byahagaritswe.",
+        "receive_failed": "Byanze kwakira ububiko. Nyamuneka ongera ugerageze.",
+        "receive_stock": "Ububiko bwakiriye itegeko ryo kugura {{poNumber}}"
     },
     "uom": {
         "exists": "Uburyo bwo gupima bufite uwo mwirondoro busanzwe bubaho.",

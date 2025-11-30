@@ -87,7 +87,14 @@
         "status_change_failed": "Failed to change purchase order status. Please try again later.",
         "cannot_send_non_draft": "Cannot send purchase order with status {{status}}. Only draft or pending orders can be sent.",
         "no_supplier_email": "Supplier email not found. Please provide a recipient email.",
-        "email_send_failed": "Failed to send purchase order email: {{error}}"
+        "email_send_failed": "Failed to send purchase order email: {{error}}",
+        "cannot_receive_status": "Cannot receive stock for purchase order with status {{status}}. Only pending or partial orders can receive stock.",
+        "product_not_in_po": "Product {{productId}} is not in this purchase order.",
+        "overdelivery_not_allowed": "Cannot receive {{quantityReceiving}} units of {{sku}}. Only {{remainingQuantity}} units remaining to receive.",
+        "batch_creation_failed": "Failed to create batch {{batchNumber}}. Receiving cancelled.",
+        "stock_adjustment_failed": "Failed to adjust stock levels. Receiving cancelled.",
+        "receive_failed": "Failed to receive stock. Please try again later.",
+        "receive_stock": "Stock received for purchase order {{poNumber}}"
     },
     "uom": {
         "exists": "A unit of measure with this code already exists.",

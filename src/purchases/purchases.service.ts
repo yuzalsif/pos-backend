@@ -10,16 +10,21 @@ import type { DocumentScope } from 'nano';
 import { v4 as uuidv4 } from 'uuid';
 import { DATABASE_CONNECTION } from '../database/database.constants';
 import { LogsService } from '../logs/logs.service';
+import { BatchesService } from '../batches/batches.service';
+import { StockService } from '../stock/stock.service';
 import {
     CreatePurchaseOrderDto,
     UpdatePurchaseOrderDto,
     SendPurchaseOrderEmailDto,
     ChangePurchaseOrderStatusDto,
 } from './dto/create-purchase-order.dto';
+import { ReceiveStockDto } from './dto/receive-stock.dto';
 import {
     PurchaseOrder,
     PurchaseOrderStatus,
     PurchaseOrderItem,
+    ReceivingRecord,
+    ReceivingItem,
 } from './purchases.types';
 
 @Injectable()
@@ -27,6 +32,8 @@ export class PurchasesService {
     constructor(
         @Inject(DATABASE_CONNECTION) private db: DocumentScope<any>,
         private readonly logsService: LogsService,
+        private readonly batchesService: BatchesService,
+        private readonly stockService: StockService,
         @Inject('MailService') private readonly mailService: any,
     ) { }
 
@@ -593,6 +600,272 @@ export class PurchasesService {
             this.logger.error('Failed to find purchase order by number', error);
             throw new InternalServerErrorException({
                 key: 'purchase.query_failed',
+            });
+        }
+    }
+
+    /**
+     * Generate receiving number in format: RCV-YYYYMMDD-XXX
+     */
+    async generateReceivingNumber(tenantId: string): Promise<string> {
+        const today = new Date();
+        const dateStr = today.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+
+        const prefix = `RCV-${dateStr}`;
+
+        try {
+            const result = await this.db.partitionedFind(tenantId, {
+                selector: {
+                    type: 'receiving',
+                    receivingNumber: {
+                        $regex: `^${prefix}`,
+                    },
+                },
+                sort: [{ receivingNumber: 'desc' }],
+                limit: 1,
+            });
+
+            if (result.docs.length === 0) {
+                return `${prefix}-001`;
+            }
+
+            const lastNumber = result.docs[0].receivingNumber;
+            const sequence = parseInt(lastNumber.split('-')[2], 10);
+            const nextSequence = (sequence + 1).toString().padStart(3, '0');
+
+            return `${prefix}-${nextSequence}`;
+        } catch (error) {
+            this.logger.error('Failed to generate receiving number', error);
+            return `${prefix}-001`;
+        }
+    }
+
+    /**
+     * Receive stock against a purchase order
+     * Creates batches and updates stock levels
+     */
+    async receiveStock(
+        tenantId: string,
+        userId: string,
+        userName: string,
+        poId: string,
+        dto: ReceiveStockDto,
+    ): Promise<ReceivingRecord> {
+        try {
+            // 1. Get the purchase order
+            const po = await this.findOne(tenantId, poId);
+
+            // 2. Validate PO status (must be pending or partial)
+            if (
+                po.status !== PurchaseOrderStatus.PENDING &&
+                po.status !== PurchaseOrderStatus.PARTIAL
+            ) {
+                throw new BadRequestException({
+                    key: 'purchase.cannot_receive_status',
+                    vars: { status: po.status },
+                });
+            }
+
+            const now = new Date().toISOString();
+            const receivingItems: ReceivingItem[] = [];
+            const createdBatches: any[] = [];
+            let totalQuantityReceived = 0;
+            let totalCost = 0;
+
+            // 3. Process each receiving item
+            for (const item of dto.items) {
+                // Find matching PO item
+                const poItem = po.items.find((i) => i.productId === item.productId);
+                if (!poItem) {
+                    throw new BadRequestException({
+                        key: 'purchase.product_not_in_po',
+                        vars: { productId: item.productId },
+                    });
+                }
+
+                // Check for over-delivery
+                const remainingQuantity =
+                    poItem.quantityOrdered - poItem.quantityReceived;
+                if (item.quantityReceiving > remainingQuantity) {
+                    throw new BadRequestException({
+                        key: 'purchase.overdelivery_not_allowed',
+                        vars: {
+                            productId: item.productId,
+                            sku: poItem.sku,
+                            quantityReceiving: item.quantityReceiving,
+                            remainingQuantity,
+                        },
+                    });
+                }
+
+                // Use cost from DTO if provided, otherwise use PO cost
+                const unitCost = item.unitCost ?? poItem.unitCost;
+
+                let batchId: string | undefined;
+
+                // If batch number provided, create batch. Otherwise, adjust stock directly
+                if (item.batchNumber) {
+                    // Create batch for this receipt
+                    try {
+                        const batch = await this.batchesService.create(
+                            tenantId,
+                            userId,
+                            userName,
+                            {
+                                productId: item.productId,
+                                batchNumber: item.batchNumber,
+                                quantity: item.quantityReceiving,
+                                purchaseCost: unitCost,
+                                supplierId: po.supplierId,
+                                purchaseId: po._id,
+                                location: 'default',
+                            },
+                        );
+
+                        createdBatches.push(batch);
+                        batchId = batch._id;
+                    } catch (batchError) {
+                        this.logger.error('Failed to create batch', batchError);
+                        throw new InternalServerErrorException({
+                            key: 'purchase.batch_creation_failed',
+                            vars: { batchNumber: item.batchNumber },
+                        });
+                    }
+                } else {
+                    // No batch tracking - adjust stock directly
+                    try {
+                        await this.stockService.adjustStock(
+                            tenantId,
+                            userId,
+                            userName,
+                            {
+                                productId: item.productId,
+                                quantity: item.quantityReceiving,
+                                type: 'in',
+                                purchaseCost: unitCost,
+                                reason: `Purchase order ${po.poNumber} received`,
+                                referenceId: po._id.split(':').pop()!,
+                                referenceType: 'purchase_order' as any,
+                                location: 'default',
+                            },
+                        );
+                    } catch (stockError) {
+                        this.logger.error('Failed to adjust stock', stockError);
+                        throw new InternalServerErrorException({
+                            key: 'purchase.stock_adjustment_failed',
+                        });
+                    }
+                }
+
+                // Update PO item received quantity
+                poItem.quantityReceived += item.quantityReceiving;
+
+                // Add to receiving record
+                receivingItems.push({
+                    productId: item.productId,
+                    sku: poItem.sku,
+                    productName: poItem.productName,
+                    quantityOrdered: poItem.quantityOrdered,
+                    quantityPreviouslyReceived:
+                        poItem.quantityReceived - item.quantityReceiving,
+                    quantityReceiving: item.quantityReceiving,
+                    unitCost,
+                    batchNumber: item.batchNumber,
+                    batchId,
+                    notes: item.notes,
+                });
+
+                totalQuantityReceived += item.quantityReceiving;
+                totalCost += unitCost * item.quantityReceiving;
+            }
+
+            // 4. Create receiving record
+            const receivingNumber = await this.generateReceivingNumber(tenantId);
+            const receiving: ReceivingRecord = {
+                _id: `${tenantId}:receiving:${uuidv4()}`,
+                type: 'receiving',
+                tenantId,
+                purchaseOrderId: po._id,
+                poNumber: po.poNumber,
+                receivingNumber,
+                supplierId: po.supplierId,
+                supplierName: po.supplierName,
+                items: receivingItems,
+                totalQuantityReceived,
+                currency: po.currency,
+                totalCost,
+                status: 'completed',
+                receivedDate: dto.receivedDate,
+                notes: dto.notes,
+                discrepancyNotes: dto.discrepancyNotes,
+                createdAt: now,
+                createdBy: { userId, name: userName },
+                updatedAt: now,
+                updatedBy: { userId, name: userName },
+            };
+
+            const rcvResponse = await this.db.insert(receiving);
+            const result = { ...receiving, _rev: rcvResponse.rev };
+
+            // 5. Update PO status based on received quantities
+            const allFullyReceived = po.items.every(
+                (item) => item.quantityReceived >= item.quantityOrdered,
+            );
+            const anyReceived = po.items.some((item) => item.quantityReceived > 0);
+
+            if (allFullyReceived) {
+                po.status = PurchaseOrderStatus.COMPLETED;
+                po.actualDeliveryDate = dto.receivedDate;
+            } else if (anyReceived) {
+                po.status = PurchaseOrderStatus.PARTIAL;
+            }
+
+            // Add receiving reference
+            if (!po.receivingIds) {
+                po.receivingIds = [];
+            }
+            po.receivingIds.push(result._id);
+
+            po.updatedAt = now;
+            po.updatedBy = { userId, name: userName };
+
+            // Update PO
+            await this.db.insert(po);
+
+            // 6. Log the receiving
+            try {
+                await this.logsService.record(
+                    tenantId,
+                    { userId, name: userName },
+                    'purchase.receive_stock',
+                    'receiving',
+                    result._id,
+                    {
+                        poNumber: po.poNumber,
+                        receivingNumber,
+                        totalQuantityReceived,
+                        totalCost,
+                        itemCount: receivingItems.length,
+                        newStatus: po.status,
+                    },
+                );
+            } catch (logError) {
+                this.logger.warn('Failed to log stock receiving', logError);
+            }
+
+            return result;
+        } catch (error) {
+            if (
+                error instanceof NotFoundException ||
+                error instanceof BadRequestException ||
+                error instanceof InternalServerErrorException
+            ) {
+                throw error;
+            }
+
+            this.logger.error('Failed to receive stock', error);
+            throw new InternalServerErrorException({
+                key: 'purchase.receive_failed',
             });
         }
     }

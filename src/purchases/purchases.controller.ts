@@ -19,6 +19,7 @@ import {
     ChangePurchaseOrderStatusDto,
     SendPurchaseOrderEmailDto,
 } from './dto/create-purchase-order.dto';
+import { ReceiveStockDto } from './dto/receive-stock.dto';
 import { PurchaseOrderStatus } from './purchases.types';
 
 @Controller('purchases')
@@ -112,6 +113,22 @@ export class PurchasesController {
             req.userName,
             id,
             emailDto,
+        );
+    }
+
+    @Post(':id/receive')
+    @RequirePermissions(Permission.PURCHASES_UPDATE)
+    async receiveStock(
+        @Request() req,
+        @Param('id') id: string,
+        @Body() receiveDto: ReceiveStockDto,
+    ) {
+        return this.purchasesService.receiveStock(
+            req.tenantId,
+            req.userId,
+            req.userName,
+            id,
+            receiveDto,
         );
     }
 }

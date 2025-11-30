@@ -55,6 +55,63 @@ export interface PurchaseOrderPdfMetadata {
     };
 }
 
+export interface ReceivingItem {
+    productId: string; // Full document ID
+    sku: string;
+    productName: string;
+    quantityOrdered: number;
+    quantityPreviouslyReceived: number;
+    quantityReceiving: number; // Current receiving
+    unitCost: number;
+    batchNumber?: string; // Batch created for this receipt (optional)
+    batchId?: string; // Created batch ID (optional)
+    notes?: string;
+}
+
+export interface ReceivingRecord {
+    _id: string; // tenant:receiving:uuid
+    type: 'receiving';
+    tenantId: string;
+
+    // Reference
+    purchaseOrderId: string; // Full PO document ID
+    poNumber: string; // Snapshot
+    receivingNumber: string; // RCV-20250126-001
+
+    // Supplier
+    supplierId: string;
+    supplierName: string;
+
+    // Items received
+    items: ReceivingItem[];
+    totalQuantityReceived: number;
+
+    // Financial
+    currency: string;
+    totalCost: number;
+
+    // Status
+    status: 'completed' | 'cancelled';
+    receivedDate: string; // ISO date
+
+    // Notes
+    notes?: string;
+    discrepancyNotes?: string; // If received != ordered
+
+    // Audit
+    _rev?: string;
+    createdAt: string;
+    createdBy: {
+        userId: string;
+        name: string;
+    };
+    updatedAt: string;
+    updatedBy: {
+        userId: string;
+        name: string;
+    };
+}
+
 export interface PurchaseOrder {
     _id: string; // tenant:purchase:uuid
     type: 'purchase';
