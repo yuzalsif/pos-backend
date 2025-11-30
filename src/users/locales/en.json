@@ -53,6 +53,18 @@
         "query_failed": "Failed to query inventory items. Please try again later.",
         "search_failed": "Failed to search for inventory item. Please try again later."
     },
+    "opening_stock": {
+        "not_found": "Opening stock entry not found.",
+        "create_failed": "Failed to create opening stock entry. Please try again later.",
+        "list_failed": "Failed to list opening stock entries. Please try again later.",
+        "query_failed": "Failed to query opening stock entries. Please try again later.",
+        "serial_quantity_mismatch": "Number of serial numbers ({{serialCount}}) does not match quantity ({{quantity}}) for product {{productId}}.",
+        "serial_creation_failed": "Failed to create inventory item for serial {{serial}}.",
+        "batch_creation_failed": "Failed to create batch {{batchNumber}} for product {{productId}}.",
+        "created": "Opening stock entry {{entryNumber}} created successfully with {{itemCount}} items.",
+        "import_no_file": "No file uploaded.",
+        "import_failed": "Failed to import opening stock. Please try again later."
+    },
     "stock": {
         "adjust_failed": "Failed to adjust stock. Please try again later.",
         "query_failed": "Failed to query stock. Please try again later.",

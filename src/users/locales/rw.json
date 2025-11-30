@@ -41,14 +41,26 @@
         "query_failed": "Byanze kubaza amatsinda. Nyamuneka ongera ugerageze."
     },
     "inventory_item": {
-        "serial_exists": "Ikintu cy'ububiko gifite iyi nimero ikurikirana kirabaho.",
-        "not_found": "Ikintu cy'ububiko ntikyabonetse.",
-        "not_found_by_serial": "Ikintu cy'ububiko ntikyabonetse kuri iyi nimero ikurikirana.",
+        "serial_exists": "Ikintu cy'ububiko gifite iyi nimero ikurikirana kiriho.",
+        "not_found": "Ikintu cy'ububiko ntiryabonetse.",
+        "not_found_by_serial": "Ikintu cy'ububiko ntiryabonetse n'imibare ikurikirana.",
         "create_failed": "Byanze gukora ikintu cy'ububiko. Nyamuneka ongera ugerageze.",
         "update_failed": "Byanze kuvugurura ikintu cy'ububiko. Nyamuneka ongera ugerageze.",
-        "list_failed": "Byanze kubona ibintu by'ububiko. Nyamuneka ongera ugerageze.",
+        "list_failed": "Byanze gutondeka ibintu by'ububiko. Nyamuneka ongera ugerageze.",
         "query_failed": "Byanze kubaza ibintu by'ububiko. Nyamuneka ongera ugerageze.",
         "search_failed": "Byanze gushakisha ikintu cy'ububiko. Nyamuneka ongera ugerageze."
+    },
+    "opening_stock": {
+        "not_found": "Icyinjijwe cy'ububiko bwo gutangira ntiryabonetse.",
+        "create_failed": "Byanze gukora icyinjijwe cy'ububiko bwo gutangira. Nyamuneka ongera ugerageze.",
+        "list_failed": "Byanze gutondeka ibyinjijwe by'ububiko bwo gutangira. Nyamuneka ongera ugerageze.",
+        "query_failed": "Byanze kubaza ibyinjijwe by'ububiko bwo gutangira. Nyamuneka ongera ugerageze.",
+        "serial_quantity_mismatch": "Umubare w'imibare ikurikirana ({{serialCount}}) ntabwo uhuye n'umubare ({{quantity}}) ku gicuruzwa {{productId}}.",
+        "serial_creation_failed": "Byanze gukora ikintu cy'ububiko kw'imibare ikurikirana {{serial}}.",
+        "batch_creation_failed": "Byanze gukora itsinda {{batchNumber}} ku gicuruzwa {{productId}}.",
+        "created": "Icyinjijwe cy'ububiko bwo gutangira {{entryNumber}} cyakozwe neza hamwe n'ibintu {{itemCount}}.",
+        "import_no_file": "Nta dosiye yakoreshejwe.",
+        "import_failed": "Byanze kohereza ububiko bwo gutangira. Nyamuneka ongera ugerageze."
     },
     "stock": {
         "adjust_failed": "Byanze guhindura ububiko. Nyamuneka ongera ugerageze.",

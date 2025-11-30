@@ -43,12 +43,24 @@
     "inventory_item": {
         "serial_exists": "Un article d'inventaire avec ce numéro de série existe déjà.",
         "not_found": "Article d'inventaire introuvable.",
-        "not_found_by_serial": "Article d'inventaire introuvable avec ce numéro de série.",
+        "not_found_by_serial": "Article d'inventaire introuvable avec le numéro de série.",
         "create_failed": "Échec de la création de l'article d'inventaire. Veuillez réessayer plus tard.",
         "update_failed": "Échec de la mise à jour de l'article d'inventaire. Veuillez réessayer plus tard.",
-        "list_failed": "Échec de la récupération des articles d'inventaire. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la liste des articles d'inventaire. Veuillez réessayer plus tard.",
         "query_failed": "Échec de la requête des articles d'inventaire. Veuillez réessayer plus tard.",
-        "search_failed": "Échec de la recherche de l'article d'inventaire. Veuillez réessayer plus tard."
+        "search_failed": "Échec de la recherche d'article d'inventaire. Veuillez réessayer plus tard."
+    },
+    "opening_stock": {
+        "not_found": "Entrée de stock d'ouverture introuvable.",
+        "create_failed": "Échec de la création de l'entrée de stock d'ouverture. Veuillez réessayer plus tard.",
+        "list_failed": "Échec de la liste des entrées de stock d'ouverture. Veuillez réessayer plus tard.",
+        "query_failed": "Échec de la requête des entrées de stock d'ouverture. Veuillez réessayer plus tard.",
+        "serial_quantity_mismatch": "Le nombre de numéros de série ({{serialCount}}) ne correspond pas à la quantité ({{quantity}}) pour le produit {{productId}}.",
+        "serial_creation_failed": "Échec de la création de l'article d'inventaire pour le numéro de série {{serial}}.",
+        "batch_creation_failed": "Échec de la création du lot {{batchNumber}} pour le produit {{productId}}.",
+        "created": "Entrée de stock d'ouverture {{entryNumber}} créée avec succès avec {{itemCount}} articles.",
+        "import_no_file": "Aucun fichier téléchargé.",
+        "import_failed": "Échec de l'importation du stock d'ouverture. Veuillez réessayer plus tard."
     },
     "stock": {
         "adjust_failed": "Échec de l'ajustement du stock. Veuillez réessayer plus tard.",

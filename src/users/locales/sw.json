@@ -50,6 +50,18 @@
         "query_failed": "Imeshindwa kuuliza vitu vya hesabu. Tafadhali jaribu tena baadaye.",
         "search_failed": "Imeshindwa kutafuta kitu cha hesabu. Tafadhali jaribu tena baadaye."
     },
+    "opening_stock": {
+        "not_found": "Ingizo la hisa ya ufunguzi halijapatikana.",
+        "create_failed": "Imeshindwa kuunda ingizo la hisa ya ufunguzi. Tafadhali jaribu tena baadaye.",
+        "list_failed": "Imeshindwa kuorodhesha maingizo ya hisa ya ufunguzi. Tafadhali jaribu tena baadaye.",
+        "query_failed": "Imeshindwa kuuliza maingizo ya hisa ya ufunguzi. Tafadhali jaribu tena baadaye.",
+        "serial_quantity_mismatch": "Idadi ya nambari za msururu ({{serialCount}}) hailingani na kiasi ({{quantity}}) kwa bidhaa {{productId}}.",
+        "serial_creation_failed": "Imeshindwa kuunda kitu cha hesabu kwa nambari ya msururu {{serial}}.",
+        "batch_creation_failed": "Imeshindwa kuunda kundi {{batchNumber}} kwa bidhaa {{productId}}.",
+        "created": "Ingizo la hisa ya ufunguzi {{entryNumber}} limeundwa kwa mafanikio na vipengee {{itemCount}}.",
+        "import_no_file": "Hakuna faili iliyopakiwa.",
+        "import_failed": "Imeshindwa kuingiza hisa ya ufunguzi. Tafadhali jaribu tena baadaye."
+    },
     "stock": {
         "adjust_failed": "Imeshindwa kurekebisha hisa. Tafadhali jaribu tena baadaye.",
         "query_failed": "Imeshindwa kuuliza hisa. Tafadhali jaribu tena baadaye.",

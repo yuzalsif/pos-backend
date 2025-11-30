@@ -7,4 +7,5 @@ export enum StockReferenceType {
   TRANSFER = 'transfer',
   ADJUSTMENT = 'adjustment',
   MANUFACTURING = 'manufacturing',
+  OPENING_STOCK = 'opening_stock',
 }
